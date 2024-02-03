@@ -52,6 +52,7 @@ export function InitiativeTracker() {
             initiativeItems.push({
               id: item.id,
               count: metadata.count,
+              url: item.image.url,
               name: item.text.plainText || item.name,
               active: metadata.active,
               visible: item.visible,
@@ -221,12 +222,12 @@ export function InitiativeTracker() {
         <List ref={listRef}>
           {initiativeItems
             .sort((a, b) => parseFloat(b.count) - parseFloat(a.count))
-            .map((initiative) => (
+            .map((item) => (
               <InitiativeListItem
-                key={initiative.id}
-                initiative={initiative}
+                key={item.id}
+                item={item}
                 onCountChange={(newCount) => {
-                  handleInitiativeCountChange(initiative.id, newCount);
+                  handleInitiativeCountChange(item.id, newCount);
                 }}
                 showHidden={role === "GM"}
               />
