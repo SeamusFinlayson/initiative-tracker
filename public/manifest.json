@@ -7,7 +7,7 @@
   "icon": "/logo.png",
   "description": "A basic initiative tracker with a shared view for you and your players",
   "action": {
-    "title": "Initiative Tracker",
+    "title": "Pretty Initiative",
     "icon": "/icon.svg",
     "popover": "/",
     "height": 129,

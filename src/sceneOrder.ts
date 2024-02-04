@@ -33,7 +33,10 @@ export function getOrder(sceneMetadata: Metadata) {
 
 export function sortFromOrder(items: InitiativeItem[], order: Object) {
 
-    const values = Object.values(order);
+    if (typeof order === "undefined") {
+        return items;
+    }
+        const values = Object.values(order);
     
     if (values.length === 0) {
         return items;
