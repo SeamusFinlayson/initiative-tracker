@@ -30,7 +30,7 @@ export function InitiativeListItem({
     return null;
   }
 
-  async function handleDoubleClick() { // TODO: add cool down after item is deleted
+  async function focusItem() { // TODO: add cool down after item is deleted
     // Deselect the list item text
     window.getSelection()?.removeAllRanges();
 
@@ -75,7 +75,7 @@ export function InitiativeListItem({
   const [inputHasHover, setInputHasHover] = useState(false);
   const handleFocus = (event: any) => { event.target.select(); };
 
-  const [buttonHasHover, setButtonHasHover] = useState(false);
+  // const [buttonHasHover, setButtonHasHover] = useState(false);
 
   return (
     <ListItem
@@ -84,20 +84,22 @@ export function InitiativeListItem({
         <Input
           disableUnderline
           sx={{ width: 48 }}
-          onFocus={(evt) => { setInputHasFocus(true); /*handleFocus(evt)*/ }}
+          onFocus={(evt) => { setInputHasFocus(true); handleFocus(evt) }}
           onBlur={() => setInputHasFocus(false)}
           onMouseEnter={() => setInputHasHover(true)}
           onMouseLeave={() => setInputHasHover(false)}
           inputProps={{
             sx: {
-              textAlign: "right",
+              textAlign: (inputHasFocus)?"center":"center",
+              pt:"5px"
               // paddingX: 1,
               // width: "40px",
             },
             style: {
               borderRadius: 8,
-              // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.4)":(inputHasHover)?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)",
-              // transition: ".1s"
+              backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.4)":(inputHasHover)?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)",
+              // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.2)":"rgba(0,0,0,0)",
+              transition: ".1s"
             }
           }}
           value={item.count}
@@ -115,30 +117,31 @@ export function InitiativeListItem({
         pl: "12px",
         pr: "64px",
       }}
-      onDoubleClick={handleDoubleClick}
+      onDoubleClick={focusItem}
     >
-      <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 1 }}>
+      <Box component={"div"} className={(!item.visible && showHidden)?"hiddenGrid":"standardGrid"}>
+
         <IconButton
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
           onClick={() => removeFromInitiative(item.id)}
-          onMouseEnter={() => setButtonHasHover(true)}
-          onMouseLeave={() => setButtonHasHover(false)}
           tabIndex={-1}
         >
           <div className="buttonBox">
+            <img className="tokenIcon" src={item.url} width="30px" height="30px"></img>
             <CloseIcon className="closeIcon" sx={{ height: 30, width: 30 }}></CloseIcon>
-            <img className="tokenIcon" src={item.url} width="30px" height="30px" /*style={{ opacity: (!item.visible && showHidden) ? "0.4" : "1" }}*/></img>
           </div>
         </IconButton>
-        <Box component="div" sx={{ color: (!item.visible && showHidden) ? "text.disabled" : "text.primary", overflow:"clip", textOverflow:"ellipsis", maxWidth:126 }}>
+        
+        {!item.visible && showHidden && (
+          <ListItemIcon sx={{ minWidth: "20px", opacity: "0.5" }}>
+            <VisibilityOffRounded fontSize="small" />
+          </ListItemIcon>
+        )}
+        <Box component="div" sx={{ color: (!item.visible && showHidden) ? "text.disabled" : "text.primary", pb:"2px" }}>
           {item.name}
         </Box>
 
-        {/* {!item.visible && showHidden && (
-          <ListItemIcon sx={{ minWidth: "30px", opacity: "0.5" }}>
-            <VisibilityOffRounded fontSize="small" />
-          </ListItemIcon>
-        )} */}
+
       </Box>
     </ListItem>
   );

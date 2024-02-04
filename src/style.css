@@ -26,8 +26,6 @@
     initial-value: 1;
 }
 
-
-
 .closeIcon {
     grid-area: 1/1/1/1;
     opacity: var(--closeOpacity);
@@ -36,4 +34,27 @@
 .tokenIcon {
     grid-area: 1/1/1/1;
     opacity: var(--tokenOpacity);
+    pointer-events: none;
+}
+
+.standardGrid {
+    display: grid;
+    grid-template-columns: 30px auto;
+    align-items: center;
+    column-gap: 8px;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.hiddenGrid {
+    display: grid;
+    grid-template-columns: 30px 20px auto;
+    align-items: center;
+    column-gap: 8px;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
 }

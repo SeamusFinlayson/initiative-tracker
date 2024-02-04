@@ -6,6 +6,8 @@ import List from "@mui/material/List";
 import Box from "@mui/material/Box";
 
 import SkipNextRounded from "@mui/icons-material/SkipNextRounded";
+import SortIcon from '@mui/icons-material/Sort';
+
 
 import OBR, { isImage, Item, Player } from "@owlbear-rodeo/sdk";
 
@@ -18,6 +20,8 @@ import { InitiativeListItem } from "./InitiativeListItem";
 import { getPluginId } from "./getPluginId";
 import { InitiativeHeader } from "./InitiativeHeader";
 import { isPlainObject } from "./isPlainObject";
+import { sortFromOrder, sortList } from "./sceneOrder";
+import { useOrder } from "./useOrder";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -122,22 +126,21 @@ export function InitiativeTracker() {
 
   function handleNextClick() {
     // Get the next index to activate
-    const sorted = initiativeItems.sort(
-      (a, b) => parseFloat(b.count) - parseFloat(a.count)
-    );
-    const nextIndex =
-      (sorted.findIndex((initiative) => initiative.active) + 1) % sorted.length;
+    const sorted = sortFromOrder(initiativeItems, order);
+    // console.log(sorted)
+
+    const nextIndex = (sorted.findIndex((initiative) => initiative.active) + 1) % sorted.length;
 
     // Set local items immediately
-    setInitiativeItems((prev) => {
-      return prev.map((init, index) => ({
-        ...init,
+    setInitiativeItems(() => {
+      return sorted.map((item, index) => ({
+        ...item,
         active: index === nextIndex,
       }));
     });
     // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      initiativeItems.map((init) => init.id),
+      sorted.map((init) => init.id),
       (items) => {
         for (let i = 0; i < items.length; i++) {
           let item = items[i];
@@ -153,14 +156,14 @@ export function InitiativeTracker() {
   function handleInitiativeCountChange(id: string, newCount: string) {
     // Set local items immediately
     setInitiativeItems((prev) =>
-      prev.map((initiative) => {
-        if (initiative.id === id) {
+      prev.map((item) => {
+        if (item.id === id) {
           return {
-            ...initiative,
+            ...item,
             count: newCount,
           };
         } else {
-          return initiative;
+          return item;
         }
       })
     );
@@ -200,6 +203,9 @@ export function InitiativeTracker() {
     }
   }, []);
 
+  const order = useOrder();
+  const sortedInitiativeItems = sortFromOrder(initiativeItems, order);
+
   return (
     <Stack height="100vh">
       <InitiativeHeader
@@ -209,19 +215,25 @@ export function InitiativeTracker() {
             : undefined
         }
         action={
-          <IconButton
-            aria-label="next"
-            onClick={handleNextClick}
-            disabled={initiativeItems.length === 0}
-          >
-            <SkipNextRounded />
-          </IconButton>
+          <>
+            <IconButton
+              onClick={() => sortList(initiativeItems)}
+            >
+              <SortIcon></SortIcon>
+            </IconButton>
+            <IconButton
+              aria-label="next"
+              onClick={handleNextClick}
+              disabled={initiativeItems.length === 0}
+            >
+              <SkipNextRounded />
+            </IconButton>
+          </>
         }
       />
       <Box sx={{ overflowY: "auto" }}>
         <List ref={listRef}>
-          {initiativeItems
-            .sort((a, b) => parseFloat(b.count) - parseFloat(a.count))
+          {sortedInitiativeItems
             .map((item) => (
               <InitiativeListItem
                 key={item.id}
