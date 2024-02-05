@@ -1,60 +1,60 @@
 .buttonBox {
-    display: grid;
-    align-items: center;
-    justify-items: center;
-    height: 30px;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  height: 30px;
 }
 
 .buttonBox:hover {
-    /* background-color: aqua; */
-    --tokenOpacity: 0;
-    --closeOpacity: 1;
+  /* background-color: aqua; */
+  --tokenOpacity: 0;
+  --closeOpacity: 1;
 }
 
 :root {
-    --tokenOpacity: 1;
-    --closeOpacity: 0;
+  --tokenOpacity: 1;
+  --closeOpacity: 0;
 }
 
 @property --tokenOpacity {
-    syntax: "<opacity>";
-    initial-value: 0;
+  syntax: "<opacity>";
+  initial-value: 0;
 }
 
 @property --closeOpacity {
-    syntax: "<opacity>";
-    initial-value: 1;
+  syntax: "<opacity>";
+  initial-value: 1;
 }
 
 .closeIcon {
-    grid-area: 1/1/1/1;
-    opacity: var(--closeOpacity);
+  grid-area: 1/1/1/1;
+  opacity: var(--closeOpacity);
 }
 
 .tokenIcon {
-    grid-area: 1/1/1/1;
-    opacity: var(--tokenOpacity);
-    pointer-events: none;
+  grid-area: 1/1/1/1;
+  opacity: var(--tokenOpacity);
+  pointer-events: none;
 }
 
 .standardGrid {
-    display: grid;
-    grid-template-columns: 30px auto;
-    align-items: center;
-    column-gap: 8px;
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+  column-gap: 8px;
 
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .hiddenGrid {
-    display: grid;
-    grid-template-columns: 30px 20px auto;
-    align-items: center;
-    column-gap: 8px;
+  display: grid;
+  grid-template-columns: 30px 20px auto;
+  align-items: center;
+  column-gap: 8px;
 
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }

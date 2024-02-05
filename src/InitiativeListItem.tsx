@@ -1,19 +1,19 @@
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Input from "@mui/material/Input";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import CloseIcon from '@mui/icons-material/Close';
-import "./style.css"
+import CloseIcon from "@mui/icons-material/Close";
+import "./style.css";
 
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "./InitiativeItem";
-import { Avatar, Button, IconButton, SvgIcon } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { Box, padding } from "@mui/system";
 import { useState } from "react";
 import { getPluginId } from "./getPluginId";
+import TokenImage from "./TokenImage";
 
 type InitiativeListItemProps = {
   item: InitiativeItem;
@@ -30,7 +30,8 @@ export function InitiativeListItem({
     return null;
   }
 
-  async function focusItem() { // TODO: add cool down after item is deleted
+  async function focusItem() {
+    // TODO: add cool down after item is deleted
     // Deselect the list item text
     window.getSelection()?.removeAllRanges();
 
@@ -73,7 +74,9 @@ export function InitiativeListItem({
 
   const [inputHasFocus, setInputHasFocus] = useState(false);
   const [inputHasHover, setInputHasHover] = useState(false);
-  const handleFocus = (event: any) => { event.target.select(); };
+  const handleFocus = (event: any) => {
+    event.target.select();
+  };
 
   // const [buttonHasHover, setButtonHasHover] = useState(false);
 
@@ -84,30 +87,37 @@ export function InitiativeListItem({
         <Input
           disableUnderline
           sx={{ width: 48 }}
-          onFocus={(evt) => { setInputHasFocus(true); handleFocus(evt) }}
+          onFocus={evt => {
+            setInputHasFocus(true);
+            handleFocus(evt);
+          }}
           onBlur={() => setInputHasFocus(false)}
           onMouseEnter={() => setInputHasHover(true)}
           onMouseLeave={() => setInputHasHover(false)}
           inputProps={{
             sx: {
-              textAlign: (inputHasFocus)?"center":"center",
-              pt:"5px"
+              textAlign: inputHasFocus ? "center" : "center",
+              pt: "5px",
               // paddingX: 1,
               // width: "40px",
             },
             style: {
               borderRadius: 8,
-              backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.4)":(inputHasHover)?"rgba(0,0,0,0.15)":"rgba(0,0,0,0)",
+              backgroundColor: inputHasFocus
+                ? "rgba(0,0,0,0.4)"
+                : inputHasHover
+                ? "rgba(0,0,0,0.15)"
+                : "rgba(0,0,0,0)",
               // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.2)":"rgba(0,0,0,0)",
-              transition: ".1s"
-            }
+              transition: ".1s",
+            },
           }}
           value={item.count}
-          onChange={(e) => {
+          onChange={e => {
             const newCount = e.target.value;
             onCountChange(newCount);
           }}
-          onDoubleClick={(e) => e.stopPropagation()}
+          onDoubleClick={e => e.stopPropagation()}
         />
       }
       divider
@@ -119,37 +129,47 @@ export function InitiativeListItem({
       }}
       onDoubleClick={focusItem}
     >
-      <Box component={"div"} className={(!item.visible && showHidden)?"hiddenGrid":"standardGrid"}>
-
+      <Box
+        component={"div"}
+        className={!item.visible && showHidden ? "hiddenGrid" : "standardGrid"}
+      >
         <IconButton
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
           onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
         >
           <div className="buttonBox">
-            <img className="tokenIcon" src={item.url} width="30px" height="30px"></img>
-            <CloseIcon className="closeIcon" sx={{ height: 30, width: 30 }}></CloseIcon>
+            <TokenImage src={item.url}></TokenImage>
+            <CloseIcon
+              className="closeIcon"
+              sx={{ height: 30, width: 30 }}
+            ></CloseIcon>
           </div>
         </IconButton>
-        
+
         {!item.visible && showHidden && (
           <ListItemIcon sx={{ minWidth: "20px", opacity: "0.5" }}>
             <VisibilityOffRounded fontSize="small" />
           </ListItemIcon>
         )}
-        <Box component="div" sx={{ color: (!item.visible && showHidden) ? "text.disabled" : "text.primary", pb:"2px" }}>
+        <Box
+          component="div"
+          sx={{
+            color:
+              !item.visible && showHidden ? "text.disabled" : "text.primary",
+            pb: "2px",
+          }}
+        >
           {item.name}
         </Box>
-
-
       </Box>
     </ListItem>
   );
 }
 
 function removeFromInitiative(itemId: string) {
-  OBR.scene.items.getItems([itemId]).then((items) => {
-    OBR.scene.items.updateItems(items, (items) => {
+  OBR.scene.items.getItems([itemId]).then(items => {
+    OBR.scene.items.updateItems(items, items => {
       for (let item of items) {
         delete item.metadata[getPluginId("metadata")];
       }

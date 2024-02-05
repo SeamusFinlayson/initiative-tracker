@@ -6,8 +6,7 @@ import List from "@mui/material/List";
 import Box from "@mui/material/Box";
 
 import SkipNextRounded from "@mui/icons-material/SkipNextRounded";
-import SortIcon from '@mui/icons-material/Sort';
-
+import SortRoundedIcon from '@mui/icons-material/SortRounded';
 
 import OBR, { isImage, Item, Player } from "@owlbear-rodeo/sdk";
 
@@ -219,7 +218,7 @@ export function InitiativeTracker() {
             <IconButton
               onClick={() => sortList(initiativeItems)}
             >
-              <SortIcon></SortIcon>
+              <SortRoundedIcon></SortRoundedIcon>
             </IconButton>
             <IconButton
               aria-label="next"
