@@ -1,26 +1,47 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { InitiativeItem } from "./InitiativeItem";
 import { getPluginId } from "./getPluginId";
+import { useEffect, useState } from "react";
 
+/** Sort items in place and write sorted order to the scene. */
 export function sortList(items: InitiativeItem[]) {
-  // console.log(items)
+  // Sort items
   const sorted = items.sort(
     (a, b) => parseFloat(b.count) - parseFloat(a.count)
   );
 
+  // Build a index: id object to represent initiative order
   let order: Order = {};
   for (let i = 0; i < sorted.length; i++) {
     order = { ...order, [i]: sorted[i].id };
   }
 
-  // console.log(sorted)
-  // console.log(order)
   OBR.scene.setMetadata({ [getPluginId("order")]: order });
 
-  return sorted;
+  return items;
 }
 
-export function getOrder(sceneMetadata: Metadata) {
+/** A hook that provides up to date access to the initiative order stored in the scene. */
+export function useOrder() {
+  const [order, setOrder] = useState({});
+
+  useEffect(() => {
+    const updateOrder = (sceneMetadata: Metadata) => {
+      setOrder(getOrder(sceneMetadata));
+    };
+    OBR.scene.getMetadata().then(sceneMetadata => {
+      updateOrder(sceneMetadata);
+    });
+    return OBR.scene.onMetadataChange(sceneMetadata => {
+      updateOrder(sceneMetadata);
+    });
+  }, []);
+
+  return order;
+}
+
+/** Extract order object from scene metadata. */
+function getOrder(sceneMetadata: Metadata) {
   try {
     const orderMetadata: Object = JSON.parse(JSON.stringify(sceneMetadata))[
       getPluginId("order")
@@ -31,8 +52,9 @@ export function getOrder(sceneMetadata: Metadata) {
   }
 }
 
+/** Sorts the items items according to the order retrieved from the scene. */
 export function sortFromOrder(items: InitiativeItem[], order: Object) {
-  // Ensure order is valid
+  // Ensure order object is valid
   if (typeof order === "undefined") {
     return items;
   }
@@ -41,20 +63,20 @@ export function sortFromOrder(items: InitiativeItem[], order: Object) {
     return items;
   }
 
+  // Add sorted items to the initiative list
   let newItems: InitiativeItem[] = [];
   for (let i = 0; i < values.length; i++) {
-    const item = items.find((item) => item.id === values[i]);
+    const item = items.find(item => item.id === values[i]);
     if (typeof item !== "undefined") {
       newItems.push(item);
-      // console.log(item.count)
     }
   }
 
+  // Add any remaining unsorted items to the initiative list
   for (let i = 0; i < items.length; i++) {
-    const found = newItems.find((item) => item.id === items[i].id);
+    const found = newItems.find(item => item.id === items[i].id);
     if (typeof found === "undefined") {
       newItems.push(items[i]);
-      // console.log(items[i].name, items[i].count)
     }
   }
 

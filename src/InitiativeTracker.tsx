@@ -19,8 +19,7 @@ import { InitiativeListItem } from "./InitiativeListItem";
 import { getPluginId } from "./getPluginId";
 import { InitiativeHeader } from "./InitiativeHeader";
 import { isPlainObject } from "./isPlainObject";
-import { sortFromOrder, sortList } from "./sceneOrder";
-import { useOrder } from "./useOrder";
+import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -122,21 +121,50 @@ export function InitiativeTracker() {
       },
     });
   }, []);
+  
+  function handleSortClick() {
+    // Sort items and write order to the scene
+    const sorted = sortList(initiativeItems);
+
+    // Focus first item
+    const nextIndex = 0;
+
+    // Set local items immediately
+    setInitiativeItems(
+      sorted.map((item, index) => ({
+        ...item,
+        active: index === nextIndex,
+      }))
+    );
+
+    // Update the scene items with the new active status
+    OBR.scene.items.updateItems(
+      sorted.map((init) => init.id),
+      (items) => {
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          const metadata = item.metadata[getPluginId("metadata")];
+          if (isMetadata(metadata)) {
+            metadata.active = i === nextIndex;
+          }
+        }
+      }
+    );
+  }
 
   function handleNextClick() {
     // Get the next index to activate
     const sorted = sortFromOrder(initiativeItems, order);
-    // console.log(sorted)
-
     const nextIndex = (sorted.findIndex((initiative) => initiative.active) + 1) % sorted.length;
 
     // Set local items immediately
-    setInitiativeItems(() => {
-      return sorted.map((item, index) => ({
+    setInitiativeItems(
+      sorted.map((item, index) => ({
         ...item,
         active: index === nextIndex,
-      }));
-    });
+      }))
+    );
+
     // Update the scene items with the new active status
     OBR.scene.items.updateItems(
       sorted.map((init) => init.id),
@@ -216,7 +244,7 @@ export function InitiativeTracker() {
         action={
           <>
             <IconButton
-              onClick={() => sortList(initiativeItems)}
+              onClick={handleSortClick}
             >
               <SortRoundedIcon></SortRoundedIcon>
             </IconButton>
