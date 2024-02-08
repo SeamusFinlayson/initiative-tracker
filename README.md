@@ -2,12 +2,11 @@
 
 Initiative tracking with pictures and a sort button.
 
-![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/45739310-4801-4cdb-b7dd-ea1c2cedb2f8)
+![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0)
 
 ## Installing
 
-The extension can be installed from the [store page coming soon]().
-
+The extension can be installed from the [store page]().
 
 Pretty Sordid is an initiative tracker based on [Initiative Tracker by Owlbear Rodeo](https://extensions.owlbear.rodeo/initiative-tracker) but I've made a few quality of life improvements that the community has been requesting for a while.
 
