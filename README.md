@@ -2,7 +2,7 @@
 
 Initiative tracking with pictures and a sort button.
 
-![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/94cd401b-837d-425d-b65a-035354c134e9)
+![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/45739310-4801-4cdb-b7dd-ea1c2cedb2f8)
 
 ## Installing
 
