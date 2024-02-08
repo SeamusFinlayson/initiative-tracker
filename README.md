@@ -8,14 +8,16 @@ Initiative tracking with pictures and a sort button.
 
 The extension can be installed from the [store page]().
 
+## About
+
 Pretty Sordid is an initiative tracker based on [Initiative Tracker by Owlbear Rodeo](https://extensions.owlbear.rodeo/initiative-tracker) but I've made a few quality of life improvements that the community has been requesting for a while.
 
-These are the improvements I sought make with this extension:
+These are the major improvements I made with this extension:
 
-* I like having a token image in the initiative because it makes it a lot more readable.
-* I added a delete from initiative button because I'm still used to roll20. Hovering over the image reveals the delete button.
-* I find the initiative sorting itself while I'm entering a number really disorienting. Did I click the right field when my friend entered their initiative right before I clicked? Where is my cursor? So I added a sort button and made sorting sync across the scene.
-* I found selecting the the number and changing it awkward so I centered the text and added hover and focus highlights. Existing text is also auto selected when you click on it.
+* Add token images to the initiative
+* Add a *delete from initiative* button to the initiative list
+* Add a sort button so the order doesn't change while you are typing
+* Add hover and focus highlights to the initiative input
 
 ## How it Works
 
@@ -23,7 +25,7 @@ You can add a character to the initiative by right clicking on it to open the co
 
 ![image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/d5ce4329-ab90-440d-8432-5aeaacf5daaf)
 
-You can remove the character from initiative by clicking the same button.
+You can remove the character from initiative by clicking the same button or hovering over the token's icon in the initiative list and then clicking the X that appears there. If you're using a touch screen, just tap the image.
 
 To change the initiative order you can change its initiative in the action popover and then click sort.
 
