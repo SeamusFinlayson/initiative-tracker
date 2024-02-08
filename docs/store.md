@@ -2,8 +2,8 @@
 title: Pretty Sordid
 description: Initiative tracking with pictures and a sort button.
 author: Seamus Finlayson
-image: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/45739310-4801-4cdb-b7dd-ea1c2cedb2f8
-icon: https://pretty-initiative.onrender.com/logo.png
+image: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0
+icon: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/fbab4357-4c5e-45af-a2d6-a83cf30c7ae8
 tags:
   - combat
 manifest: https://pretty-initiative.onrender.com/manifest.json
