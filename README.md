@@ -1,12 +1,12 @@
 # Pretty Sordid
 
-Initiative tracking with pictures and a sort button.
+*Initiative tracking with token icons and a sort button!*
 
 ![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0)
 
 ## Installing
 
-The extension can be installed from the [store page]().
+The extension can be installed from the [store page](https://extensions.owlbear.rodeo/pretty-sordid).
 
 ## About
 

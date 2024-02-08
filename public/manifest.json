@@ -5,7 +5,7 @@
   "author": "Seamus Finlayson",
   "homepage_url": "https://github.com/SeamusFinlayson/initiative-tracker",
   "icon": "/logo.png",
-  "description": "Initiative tracking with pictures and a sort button.",
+  "description": "Initiative tracking with token icons and a sort button!",
   "action": {
     "title": "Pretty Sordid",
     "icon": "/icon.svg",

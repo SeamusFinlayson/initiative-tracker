@@ -1,6 +1,6 @@
 ---
 title: Pretty Sordid
-description: Initiative tracking with pictures and a sort button.
+description: Initiative tracking with token icons and a sort button!
 author: Seamus Finlayson
 image: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0
 icon: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/fbab4357-4c5e-45af-a2d6-a83cf30c7ae8
@@ -11,6 +11,8 @@ learn-more: https://github.com/SeamusFinlayson/initiative-tracker
 ---
 
 # Pretty Sordid
+
+*Initiative tracking with token icons and a sort button!*
 
 Pretty Sordid is an initiative tracker based on [Initiative Tracker by Owlbear Rodeo](https://extensions.owlbear.rodeo/initiative-tracker) but I've made a few quality of life improvements that the community has been requesting for a while.
 
