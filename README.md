@@ -6,7 +6,9 @@
 
 ## Installing
 
-The extension can be installed from the [store page](https://extensions.owlbear.rodeo/pretty-sordid).
+Install this extension using the install link: https://pretty-initiative.onrender.com/manifest.json
+
+Coming soon: ~~The extension can be installed from the [store page](https://extensions.owlbear.rodeo/pretty-sordid).~~
 
 ## About
 
