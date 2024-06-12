@@ -2,7 +2,6 @@ import ListItem from "@mui/material/ListItem";
 import Input from "@mui/material/Input";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import CloseIcon from "@mui/icons-material/Close";
-import "./style.css";
 
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 
@@ -12,19 +11,21 @@ import { InitiativeItem } from "./InitiativeItem";
 import { IconButton } from "@mui/material";
 import { Box, padding } from "@mui/system";
 import { useState } from "react";
-import { getPluginId } from "./getPluginId";
+import { getPluginId } from "../getPluginId";
 import TokenImage from "./TokenImage";
 
 type InitiativeListItemProps = {
   item: InitiativeItem;
   onCountChange: (count: string) => void;
   showHidden: boolean;
+  darkMode: boolean;
 };
 
 export function InitiativeListItem({
   item,
   onCountChange,
   showHidden,
+  darkMode,
 }: InitiativeListItemProps) {
   if (!item.visible && !showHidden) {
     return null;
@@ -80,7 +81,6 @@ export function InitiativeListItem({
 
   // const [buttonHasHover, setButtonHasHover] = useState(false);
 
-
   return (
     <ListItem
       key={item.id}
@@ -105,9 +105,13 @@ export function InitiativeListItem({
             style: {
               borderRadius: 8,
               backgroundColor: inputHasFocus
-                ? "rgba(0,0,0,0.4)"
+                ? darkMode
+                  ? "rgba(0,0,0,0.4)"
+                  : "rgba(255,255,255,0.24)"
                 : inputHasHover
-                ? "rgba(0,0,0,0.15)"
+                ? darkMode
+                  ? "rgba(0,0,0,0.15)"
+                  : "rgba(255,255,255,0.12)"
                 : "rgba(0,0,0,0)",
               // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.2)":"rgba(0,0,0,0)",
               transition: ".1s",

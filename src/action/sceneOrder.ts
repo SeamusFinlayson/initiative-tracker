@@ -1,13 +1,15 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { InitiativeItem } from "./InitiativeItem";
-import { getPluginId } from "./getPluginId";
+import { getPluginId } from "../getPluginId";
 import { useEffect, useState } from "react";
 
 /** Sort items in place and write sorted order to the scene. */
-export function sortList(items: InitiativeItem[]) {
+export function sortList(items: InitiativeItem[], sortAscending = false) {
   // Sort items
   const sorted = items.sort(
-    (a, b) => parseFloat(b.count) - parseFloat(a.count)
+    sortAscending
+      ? (a, b) => parseFloat(a.count) - parseFloat(b.count)
+      : (a, b) => parseFloat(b.count) - parseFloat(a.count)
   );
 
   // Build a index: id object to represent initiative order
