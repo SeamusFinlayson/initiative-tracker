@@ -4,6 +4,7 @@ export default function SortAscendingIcon({
   darkMode: boolean;
 }): JSX.Element {
   return (
+    // This svg is licensed under the Zest Free License which can be found in attributions.md
     <svg
       width="36px"
       height="36px"
