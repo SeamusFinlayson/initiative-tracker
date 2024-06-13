@@ -64,7 +64,7 @@ export default function Settings(): JSX.Element {
 
   return (
     <Box sx={{ p: 2, pt: 0, pb: 0, color: "text.primary" }}>
-      <Typography sx={{ fontSize: 26, pt: 3, pb: 0 }}>
+      <Typography sx={{ fontSize: 20, fontWeight: "bold", pt: 3, pb: 0 }}>
         Pretty Sordid Settings
       </Typography>
       <Divider variant="fullWidth" sx={{ mt: 2, mb: 2 }} />
@@ -96,11 +96,12 @@ export default function Settings(): JSX.Element {
           <Typography>Use advanced controls</Typography>
           <Switch
             checked={advancedControls}
-            onChange={(_e, value) =>
+            onChange={(_e, value) => {
+              setAdvancedControls(value);
               OBR.room.setMetadata({
                 [getPluginId(ADVANCED_CONTROLS_METADATA_ID)]: value,
-              })
-            }
+              });
+            }}
           ></Switch>
         </Box>
 
@@ -115,6 +116,7 @@ export default function Settings(): JSX.Element {
           <Switch
             checked={displayRound}
             onChange={(_e, value) => {
+              setDisplayRound(value);
               OBR.room.setMetadata({
                 [getPluginId(DISPLAY_ROUND_METADATA_ID)]: value,
               });
