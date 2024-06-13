@@ -1,8 +1,8 @@
 # Pretty Sordid
 
-*Initiative tracking with token icons and a sort button!*
+_Initiative tracking with token icons and a sort button!_
 
-![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0)
+![hero image](https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/18bfafe8-2285-4f70-899f-ba8098f32757)
 
 ## Installing
 
@@ -14,10 +14,13 @@ Pretty Sordid is an initiative tracker based on [Initiative Tracker by Owlbear R
 
 These are the major improvements I made with this extension:
 
-* Add token images to the initiative
-* Add a *delete from initiative* button to the initiative list
-* Add a sort button so the order doesn't change while you are typing
-* Add hover and focus highlights to the initiative input
+- Add token images to the initiative
+- Add a _delete from initiative_ button to the initiative list
+- Add a dedicated sort button so the order doesn't change while you are typing
+- Add hover and focus highlights to the initiative input
+- Add the option to sort using descending or ascending order
+- Add the option to display a back button
+- Add the option to display a round counter
 
 ## How it Works
 
@@ -33,7 +36,7 @@ You can move through the initiative order by clicking the arrow icon in the top 
 
 ## Feature Requests
 
-I may accept feature requests but - as I have limited time and development plans of my own - being a paid member on [Patreon](https://www.patreon.com/SeamusFinlayson) is your best path to getting a feature implemented. 
+I may accept feature requests but - as I have limited time and development plans of my own - being a paid member on [Patreon](https://www.patreon.com/SeamusFinlayson) is your best path to getting a feature implemented.
 
 ## Support
 
@@ -49,8 +52,6 @@ The logo uses the image "[Butterfly Origami](https://www.svgrepo.com/svg/423822/
 
 GNU GPLv3
 
-## Contributing
-
-This project is provided as an example of how to use the Owlbear Rodeo SDK. As such it is unlikely that we will accept pull requests for new features.
-
 Copyright (C) 2023 Owlbear Rodeo
+
+Copyright (C) 2024 Seamus Finlayson

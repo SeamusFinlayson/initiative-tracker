@@ -2,7 +2,7 @@
 title: Pretty Sordid
 description: Initiative tracking with token icons and a sort button!
 author: Seamus Finlayson
-image: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/79f770db-ad85-4767-ac25-9e7c89fff0c0
+image: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/18bfafe8-2285-4f70-899f-ba8098f32757
 icon: https://github.com/SeamusFinlayson/initiative-tracker/assets/77430559/fbab4357-4c5e-45af-a2d6-a83cf30c7ae8
 tags:
   - combat
@@ -12,16 +12,19 @@ learn-more: https://github.com/SeamusFinlayson/initiative-tracker
 
 # Pretty Sordid
 
-*Initiative tracking with token icons and a sort button!*
+_Initiative tracking with token icons and a sort button!_
 
 Pretty Sordid is an initiative tracker based on [Initiative Tracker by Owlbear Rodeo](https://extensions.owlbear.rodeo/initiative-tracker) but I've made a few quality of life improvements that the community has been requesting for a while.
 
 These are the major improvements I made with this extension:
 
-* Add token images to the initiative
-* Add a *delete from initiative* button to the initiative list
-* Add a sort button so the order doesn't change while you are typing
-* Add hover and focus highlights to the initiative input
+- Add token images to the initiative
+- Add a _delete from initiative_ button to the initiative list
+- Add a dedicated sort button so the order doesn't change while you are typing
+- Add hover and focus highlights to the initiative input
+- Add the option to sort using descending or ascending order
+- Add the option to display a back button
+- Add the option to display a round counter
 
 ## How it Works
 
@@ -37,7 +40,7 @@ You can move through the initiative order by clicking the arrow icon in the top 
 
 ## Feature Requests
 
-I may accept feature requests but - as I have limited time and development plans of my own - being a paid member on [Patreon](https://www.patreon.com/SeamusFinlayson) is your best path to getting a feature implemented. 
+I may accept feature requests but - as I have limited time and development plans of my own - being a paid member on [Patreon](https://www.patreon.com/SeamusFinlayson) is your best path to getting a feature implemented.
 
 ## Support
 
