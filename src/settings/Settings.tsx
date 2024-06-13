@@ -9,7 +9,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import OBR, { Metadata } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Player } from "@owlbear-rodeo/sdk";
 import { useEffect, useState } from "react";
 import { getPluginId } from "../getPluginId";
 import {
@@ -52,6 +52,13 @@ export default function Settings(): JSX.Element {
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
     return OBR.room.onMetadataChange(handleRoomMetadataChange);
+  }, []);
+
+  // Close settings popover if the users role changes to "PLAYER"
+  useEffect(() => {
+    return OBR.player.onChange((player: Player) => {
+      if (player.role === "PLAYER") OBR.popover.close(getPluginId("settings"));
+    });
   }, []);
 
   const settingRowSx: SxProps<Theme> = {
