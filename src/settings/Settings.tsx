@@ -76,9 +76,11 @@ export default function Settings(): JSX.Element {
             value={sortAscending.toString()}
             exclusive
             onChange={(_e, value) => {
-              setSortAscending(value);
+              const newSortAscending =
+                value === null ? sortAscending : value === "true";
+              setSortAscending(newSortAscending);
               OBR.room.setMetadata({
-                [getPluginId(SORT_ASCENDING_METADATA_ID)]: value === "true",
+                [getPluginId(SORT_ASCENDING_METADATA_ID)]: newSortAscending,
               });
             }}
             aria-label="ascending or descending"
