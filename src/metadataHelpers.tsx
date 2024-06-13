@@ -5,9 +5,10 @@ import { getPluginId } from "./getPluginId";
 export const ROUND_COUNT_METADATA_ID = "roundCount";
 
 // room metadata
+export const SORT_ASCENDING_METADATA_ID = "sortAscending";
 export const ADVANCED_CONTROLS_METADATA_ID = "advancedControls";
 export const DISPLAY_ROUND_METADATA_ID = "displayRound";
-export const SORT_ASCENDING_METADATA_ID = "sortAscending";
+export const DISABLE_NOTIFICATION_METADATA_ID = "disableNotifications";
 
 export function readBooleanFromMetadata(
   metadata: Metadata,

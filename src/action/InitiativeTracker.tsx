@@ -27,6 +27,7 @@ import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
 import { Button, Card, Icon, Tooltip, useTheme } from "@mui/material";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
+  DISABLE_NOTIFICATION_METADATA_ID,
   DISPLAY_ROUND_METADATA_ID,
   readBooleanFromMetadata,
   readNumberFromMetadata,
@@ -51,10 +52,13 @@ function isMetadata(
 export function InitiativeTracker() {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
   const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
+
   const [roundCount, setRoundCount] = useState(1);
+
   const [sortAscending, setSortAscending] = useState(false);
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
+  const [disableNotifications, setDisableNotifications] = useState(false);
 
   useEffect(() => {
     const handlePlayerChange = (player: Player) => {
@@ -80,6 +84,13 @@ export function InitiativeTracker() {
 
   useEffect(() => {
     const handleRoomMetadataChange = (roomMetadata: Metadata) => {
+      setSortAscending(
+        readBooleanFromMetadata(
+          roomMetadata,
+          SORT_ASCENDING_METADATA_ID,
+          sortAscending
+        )
+      );
       setAdvancedControls(
         readBooleanFromMetadata(
           roomMetadata,
@@ -94,17 +105,17 @@ export function InitiativeTracker() {
           displayRound
         )
       );
-      setSortAscending(
+      setDisableNotifications(
         readBooleanFromMetadata(
           roomMetadata,
-          SORT_ASCENDING_METADATA_ID,
-          sortAscending
+          DISABLE_NOTIFICATION_METADATA_ID,
+          disableNotifications
         )
       );
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
     return OBR.room.onMetadataChange(handleRoomMetadataChange);
-  });
+  }, []);
 
   useEffect(() => {
     const handleItemsChange = async (items: Item[]) => {
@@ -222,11 +233,12 @@ export function InitiativeTracker() {
 
     if (newIndex < 0) {
       newIndex = sorted.length + newIndex;
-      if (displayRound && roundCount > 1)
+      if (advancedControls && displayRound && roundCount > 1)
         updateRoundCount(roundCount - 1, setRoundCount);
     } else if (newIndex >= sorted.length) {
       newIndex = newIndex % sorted.length;
-      if (displayRound) updateRoundCount(roundCount + 1, setRoundCount);
+      if (advancedControls && displayRound)
+        updateRoundCount(roundCount + 1, setRoundCount);
     }
 
     // Set local items immediately
@@ -334,7 +346,7 @@ export function InitiativeTracker() {
                     id: getPluginId("settings"),
                     url: "/src/settings/settings.html",
                     width: 400,
-                    height: 250,
+                    height: 280,
                   })
                 }
               >
@@ -419,15 +431,12 @@ export function InitiativeTracker() {
                   onClick={() => {
                     if (role === "GM") {
                       updateRoundCount(1, setRoundCount);
-                      OBR.notification.show(
-                        "Round counter reset. Use Undo to restore the counter.",
-                        "INFO"
-                      );
-                    } else
-                      OBR.notification.show(
-                        "GM access is required to reset the round counter.",
-                        "ERROR"
-                      );
+                      if (!disableNotifications)
+                        OBR.notification.show(
+                          "Round counter reset. Use Undo to restore the counter.",
+                          "INFO"
+                        );
+                    }
                   }}
                 >
                   Round {roundCount}
