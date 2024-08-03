@@ -19,6 +19,7 @@ import {
   DISPLAY_ROUND_METADATA_ID,
   ROUND_COUNT_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
+  DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID,
   readBooleanFromMetadata,
 } from "../metadataHelpers";
 import { Height, StayPrimaryLandscape } from "@mui/icons-material";
@@ -28,6 +29,7 @@ export default function Settings(): JSX.Element {
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
+  const [drawSteelEnabled, setDrawSteelEnabled] = useState(false);
   const [initializationDone, setInitializationDone] = useState(false);
 
   useEffect(() => {
@@ -58,6 +60,13 @@ export default function Settings(): JSX.Element {
           roomMetadata,
           DISABLE_NOTIFICATION_METADATA_ID,
           disableNotifications
+        )
+      );
+      setDrawSteelEnabled(
+        readBooleanFromMetadata(
+          roomMetadata,
+          DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID,
+          drawSteelEnabled
         )
       );
       setInitializationDone(true);
@@ -156,6 +165,19 @@ export default function Settings(): JSX.Element {
                   setDisableNotifications(value);
                   OBR.room.setMetadata({
                     [getPluginId(DISABLE_NOTIFICATION_METADATA_ID)]: value,
+                  });
+                }}
+              ></Switch>
+            </Box>
+            <Box sx={settingRowSx}>
+              <Typography>Draw Steel Initiative</Typography>
+              <Switch
+                checked={drawSteelEnabled}
+                onChange={(_e, value) => {
+                  setDrawSteelEnabled(value);
+                  OBR.room.setMetadata({
+                    [getPluginId(DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID)]:
+                      value,
                   });
                 }}
               ></Switch>

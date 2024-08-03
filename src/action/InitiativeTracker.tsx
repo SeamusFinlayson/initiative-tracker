@@ -37,6 +37,7 @@ import {
 } from "../metadataHelpers";
 import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
+import SettingsButton from "../components/SettingsButton";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -339,20 +340,7 @@ export function InitiativeTracker() {
         }
         action={
           <>
-            {role === "GM" && (
-              <IconButton
-                onClick={() =>
-                  OBR.popover.open({
-                    id: getPluginId("settings"),
-                    url: "/src/settings/settings.html",
-                    width: 400,
-                    height: 280,
-                  })
-                }
-              >
-                <SettingsRoundedIcon></SettingsRoundedIcon>
-              </IconButton>
-            )}
+            {role === "GM" && <SettingsButton></SettingsButton>}
             <IconButton onClick={handleSortClick}>
               <Icon>
                 {sortAscending ? (

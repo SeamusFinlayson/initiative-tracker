@@ -9,6 +9,7 @@ export const SORT_ASCENDING_METADATA_ID = "sortAscending";
 export const ADVANCED_CONTROLS_METADATA_ID = "advancedControls";
 export const DISPLAY_ROUND_METADATA_ID = "displayRound";
 export const DISABLE_NOTIFICATION_METADATA_ID = "disableNotifications";
+export const DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID = "drawSteelEnabled";
 
 export function readBooleanFromMetadata(
   metadata: Metadata,
