@@ -5,7 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 
-import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
 import { IconButton } from "@mui/material";
@@ -13,6 +13,7 @@ import { Box } from "@mui/system";
 import { useState } from "react";
 import { getPluginId } from "../getPluginId";
 import TokenImage from "../TokenImage";
+import { focusItem } from "../findItem";
 
 type InitiativeListItemProps = {
   item: InitiativeItem;
@@ -32,48 +33,6 @@ export function InitiativeListItem({
 
   if (!item.visible && !showHidden) {
     return null;
-  }
-
-  async function focusItem() {
-    // TODO: add cool down after item is deleted
-    // Deselect the list item text
-    window.getSelection()?.removeAllRanges();
-
-    // Select this item
-    await OBR.player.select([item.id]);
-
-    // Focus on this item
-
-    // Convert the center of the selected item to screen-space
-    const bounds = await OBR.scene.items.getItemBounds([item.id]);
-    const boundsAbsoluteCenter = await OBR.viewport.transformPoint(
-      bounds.center
-    );
-
-    // Get the center of the viewport in screen-space
-    const viewportWidth = await OBR.viewport.getWidth();
-    const viewportHeight = await OBR.viewport.getHeight();
-    const viewportCenter: Vector2 = {
-      x: viewportWidth / 2,
-      y: viewportHeight / 2,
-    };
-
-    // Offset the item center by the viewport center
-    const absoluteCenter = Math2.subtract(boundsAbsoluteCenter, viewportCenter);
-
-    // Convert the center to world-space
-    const relativeCenter = await OBR.viewport.inverseTransformPoint(
-      absoluteCenter
-    );
-
-    // Invert and scale the world-space position to match a viewport position offset
-    const viewportScale = await OBR.viewport.getScale();
-    const viewportPosition = Math2.multiply(relativeCenter, -viewportScale);
-
-    await OBR.viewport.animateTo({
-      scale: viewportScale,
-      position: viewportPosition,
-    });
   }
 
   const handleFocus = (target: HTMLInputElement) => {
@@ -133,7 +92,7 @@ export function InitiativeListItem({
         pl: "12px",
         pr: "64px",
       }}
-      onDoubleClick={focusItem}
+      onDoubleClick={() => focusItem(item.id)}
     >
       <Box
         component={"div"}

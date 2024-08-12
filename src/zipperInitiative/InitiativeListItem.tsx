@@ -5,67 +5,31 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import OutlinedFlagRoundedIcon from "@mui/icons-material/OutlinedFlagRounded";
+import MoveDownRoundedIcon from "@mui/icons-material/MoveDownRounded";
+import MoveUpRoundedIcon from "@mui/icons-material/MoveUpRounded";
 
-import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
 import { Checkbox, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import { getPluginId } from "../getPluginId";
 import TokenImage from "../TokenImage";
+import { focusItem } from "../findItem";
 
 export function InitiativeListItem({
   item,
   onReadyChange,
+  onGroupClick,
   showHidden,
 }: {
   item: InitiativeItem;
   onReadyChange: (ready: boolean) => void;
+  onGroupClick: (currentGroup: number) => void;
   showHidden: boolean;
 }) {
   if (!item.visible && !showHidden) {
     return null;
-  }
-
-  async function focusItem() {
-    // Deselect the list item text
-    window.getSelection()?.removeAllRanges();
-
-    // Select this item
-    await OBR.player.select([item.id]);
-
-    // Focus on this item
-
-    // Convert the center of the selected item to screen-space
-    const bounds = await OBR.scene.items.getItemBounds([item.id]);
-    const boundsAbsoluteCenter = await OBR.viewport.transformPoint(
-      bounds.center
-    );
-
-    // Get the center of the viewport in screen-space
-    const viewportWidth = await OBR.viewport.getWidth();
-    const viewportHeight = await OBR.viewport.getHeight();
-    const viewportCenter: Vector2 = {
-      x: viewportWidth / 2,
-      y: viewportHeight / 2,
-    };
-
-    // Offset the item center by the viewport center
-    const absoluteCenter = Math2.subtract(boundsAbsoluteCenter, viewportCenter);
-
-    // Convert the center to world-space
-    const relativeCenter = await OBR.viewport.inverseTransformPoint(
-      absoluteCenter
-    );
-
-    // Invert and scale the world-space position to match a viewport position offset
-    const viewportScale = await OBR.viewport.getScale();
-    const viewportPosition = Math2.multiply(relativeCenter, -viewportScale);
-
-    await OBR.viewport.animateTo({
-      scale: viewportScale,
-      position: viewportPosition,
-    });
   }
 
   const handleFocus = (event: any) => {
@@ -77,8 +41,22 @@ export function InitiativeListItem({
   return (
     <ListItem
       key={item.id}
+      className={"item"}
       secondaryAction={
         <>
+          {showHidden && (
+            <IconButton
+              className="buttonBox"
+              onClick={() => onGroupClick(item.group)}
+              onDoubleClick={e => e.stopPropagation()}
+            >
+              {item.group === 0 ? (
+                <MoveDownRoundedIcon className="changeGroupButton" />
+              ) : (
+                <MoveUpRoundedIcon className="changeGroupButton" />
+              )}
+            </IconButton>
+          )}
           <Checkbox
             checkedIcon={<FlagRoundedIcon></FlagRoundedIcon>}
             icon={<OutlinedFlagRoundedIcon></OutlinedFlagRoundedIcon>}
@@ -87,22 +65,18 @@ export function InitiativeListItem({
               handleFocus(evt);
             }}
             value={item.count}
-            onChange={e => {
-              const ready = e.target.checked;
-              onReadyChange(ready);
-            }}
+            onChange={e => onReadyChange(e.target.checked)}
             onDoubleClick={e => e.stopPropagation()}
           />
         </>
       }
       divider
-      selected={item.active}
       sx={{
         padding: 1,
         pl: "12px",
         pr: "64px",
       }}
-      onDoubleClick={focusItem}
+      onDoubleClick={() => focusItem(item.id)}
     >
       <Box
         component={"div"}

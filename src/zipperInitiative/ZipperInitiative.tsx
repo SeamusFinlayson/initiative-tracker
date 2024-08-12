@@ -9,14 +9,11 @@ import LoopRoundedIcon from "@mui/icons-material/LoopRounded";
 
 import OBR, { isImage, Item, Metadata, Player } from "@owlbear-rodeo/sdk";
 
-import { InitiativeItem, isMetadata } from "../InitiativeItem";
-
-import addIcon from "../assets/add.svg";
-import removeIcon from "../assets/remove.svg";
+import { InitiativeItem } from "../InitiativeItem";
 
 import { getPluginId } from "../getPluginId";
 import { InitiativeHeader } from "../InitiativeHeader";
-import { Icon } from "@mui/material";
+import { Divider, Icon, Typography } from "@mui/material";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -28,6 +25,21 @@ import {
 } from "../metadataHelpers";
 import SettingsButton from "../components/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
+import { isPlainObject } from "../isPlainObject";
+
+/** Check that the item metadata is in the correct format */
+function isMetadata(metadata: unknown): metadata is {
+  count: string;
+  active: boolean;
+  ready: boolean | undefined;
+  group: number | undefined;
+} {
+  return (
+    isPlainObject(metadata) &&
+    typeof metadata.count === "string" &&
+    typeof metadata.active === "boolean"
+  );
+}
 
 export function ZipperInitiative() {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
@@ -112,6 +124,7 @@ export function ZipperInitiative() {
               active: metadata.active,
               count: metadata.count,
               ready: metadata.ready !== undefined ? metadata.ready : true,
+              group: metadata.group !== undefined ? metadata.group : 1,
             });
           }
         }
@@ -121,59 +134,6 @@ export function ZipperInitiative() {
 
     OBR.scene.items.getItems().then(handleItemsChange);
     return OBR.scene.items.onChange(handleItemsChange);
-  }, []);
-
-  useEffect(() => {
-    OBR.contextMenu.create({
-      icons: [
-        {
-          icon: addIcon,
-          label: "Add to Initiative",
-          filter: {
-            every: [
-              { key: "layer", value: "CHARACTER", coordinator: "||" },
-              { key: "layer", value: "MOUNT" },
-              { key: "type", value: "IMAGE" },
-              { key: ["metadata", getPluginId("metadata")], value: undefined },
-            ],
-            permissions: ["UPDATE"],
-          },
-        },
-        {
-          icon: removeIcon,
-          label: "Remove from Initiative",
-          filter: {
-            every: [
-              { key: "layer", value: "CHARACTER", coordinator: "||" },
-              { key: "layer", value: "MOUNT" },
-              { key: "type", value: "IMAGE" },
-            ],
-            permissions: ["UPDATE"],
-          },
-        },
-      ],
-      id: getPluginId("menu/toggle"),
-      onClick(context) {
-        OBR.scene.items.updateItems(context.items, items => {
-          // Check whether to add the items to initiative or remove them
-          const addToInitiative = items.every(
-            item => item.metadata[getPluginId("metadata")] === undefined
-          );
-          let count = 0;
-          for (const item of items) {
-            if (addToInitiative) {
-              item.metadata[getPluginId("metadata")] = {
-                count: `${count}`,
-                active: false,
-              };
-              count += 1;
-            } else {
-              delete item.metadata[getPluginId("metadata")];
-            }
-          }
-        });
-      },
-    });
   }, []);
 
   function handleReadyChange(id: string, ready: boolean) {
@@ -201,6 +161,32 @@ export function ZipperInitiative() {
     });
   }
 
+  function handleGroupChange(id: string, currentGroup: number) {
+    const newGroup = currentGroup === 0 ? 1 : 0;
+    // Set local items immediately
+    setInitiativeItems(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            group: newGroup,
+          };
+        } else {
+          return item;
+        }
+      })
+    );
+    // Sync changes over the network
+    OBR.scene.items.updateItems([id], items => {
+      for (const item of items) {
+        const metadata = item.metadata[getPluginId("metadata")];
+        if (isMetadata(metadata)) {
+          metadata.group = newGroup;
+        }
+      }
+    });
+  }
+
   function handleResetClicked() {
     // Set local items immediately
     setInitiativeItems(
@@ -215,7 +201,7 @@ export function ZipperInitiative() {
       initiativeItems.map(init => init.id),
       items => {
         for (let i = 0; i < items.length; i++) {
-          let item = items[i];
+          const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.ready = true;
@@ -227,31 +213,47 @@ export function ZipperInitiative() {
 
   const zoomMargin = 1; // scroll bar shows up at 90% page zoom w/o this
   const advancedControlsHeight = 56;
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef0 = useRef<HTMLUListElement>(null);
+  const listRef1 = useRef<HTMLUListElement>(null);
+  const listRefs: React.RefObject<HTMLUListElement>[] = [listRef0, listRef1];
+  type HeightTracker = { resizeObserver: ResizeObserver; height: number };
   useEffect(() => {
-    if (listRef.current && ResizeObserver) {
-      const resizeObserver = new ResizeObserver(entries => {
-        if (entries.length > 0) {
-          const entry = entries[0];
-          // Get the height of the border box
-          // In the future you can use `entry.borderBoxSize`
-          // however as of this time the property isn't widely supported (iOS)
-          const borderHeight = entry.contentRect.bottom + entry.contentRect.top;
-          // Set a minimum height of 64px
-          const listHeight = Math.max(borderHeight, 64);
-          // Set the action height to the list height + the card header height + the divider + margin
-          OBR.action.setHeight(
-            listHeight +
-              64 +
-              1 +
-              zoomMargin +
-              (advancedControls ? advancedControlsHeight : 0)
-          );
-        }
-      });
-      resizeObserver.observe(listRef.current);
+    if (listRef0.current && listRef1.current && ResizeObserver) {
+      const makeResizeObserver = (
+        listHeights: HeightTracker[],
+        index: number
+      ) =>
+        new ResizeObserver(entries => {
+          if (entries.length > 0) {
+            const entry = entries[0];
+            // Get the height of the border box
+            // In the future you can use `entry.borderBoxSize`
+            // however as of this time the property isn't widely supported (iOS)
+            const borderHeight =
+              entry.contentRect.bottom + entry.contentRect.top;
+            // Set a minimum height of 64px
+            listHeights[index].height = Math.max(borderHeight, 0);
+            let sum = 0;
+            listHeights.forEach(height => {
+              sum += Math.max(height.height, 36);
+            });
+            // Set the action height to the list height + the card header height + the divider + margin
+            OBR.action.setHeight(sum + 64 + 1 + zoomMargin + 49 * 2);
+          }
+        });
+      const listHeights: HeightTracker[] = [];
+      for (let i = 0; i < listRefs.length; i++) {
+        listHeights.push({
+          resizeObserver: makeResizeObserver(listHeights, i),
+          height: 0,
+        });
+        const current = listRefs[i].current;
+        if (current) listHeights[i].resizeObserver.observe(current);
+      }
       return () => {
-        resizeObserver.disconnect();
+        listHeights.forEach(value => {
+          value.resizeObserver.disconnect();
+        });
         // Reset height when unmounted
         OBR.action.setHeight(
           129 + zoomMargin + (advancedControls ? advancedControlsHeight : 0)
@@ -262,31 +264,103 @@ export function ZipperInitiative() {
 
   // const themeIsDark = useTheme().palette.mode === "dark";
 
+  const partyItems = initiativeItems.filter(item => item.group === 0);
+  const enemyItems = initiativeItems.filter(item => item.group === 1);
+
   return (
     <Stack height="100vh">
       <InitiativeHeader
-        subtitle={
-          initiativeItems.length === 0
-            ? "Select a character to start initiative"
-            : undefined
-        }
         action={
           <>
             {role === "GM" && <SettingsButton></SettingsButton>}
-            <IconButton onClick={handleResetClicked}>
-              <Icon>
-                <LoopRoundedIcon></LoopRoundedIcon>
-              </Icon>
-            </IconButton>
+            {role === "GM" && (
+              <IconButton onClick={handleResetClicked}>
+                <Icon>
+                  <LoopRoundedIcon></LoopRoundedIcon>
+                </Icon>
+              </IconButton>
+            )}
           </>
         }
       />
       <Box sx={{ overflowY: "auto" }}>
-        <List ref={listRef}>
-          {initiativeItems.map(item => (
+        <Typography
+          variant="overline"
+          sx={{
+            px: 2,
+            py: 0.5,
+            display: "inline-block",
+            color: "text.secondary",
+          }}
+        >
+          Party
+        </Typography>
+        <Divider variant="fullWidth" />
+
+        {partyItems.length === 0 && (
+          <Typography
+            variant="caption"
+            sx={{
+              px: 2,
+              py: 1,
+              display: "inline-block",
+              color: "text.secondary",
+            }}
+          >
+            The party seems to be empty
+          </Typography>
+        )}
+        <List ref={listRef0} sx={{ py: 0 }}>
+          {partyItems.map(item => (
             <InitiativeListItem
               key={item.id}
               item={item}
+              onGroupClick={(currentGroup: number) =>
+                handleGroupChange(item.id, currentGroup)
+              }
+              onReadyChange={ready => {
+                handleReadyChange(item.id, ready);
+              }}
+              showHidden={role === "GM"}
+            />
+          ))}
+        </List>
+
+        <Typography
+          variant="overline"
+          sx={{
+            px: 2,
+            py: 0.5,
+
+            display: "inline-block",
+            color: "text.secondary",
+          }}
+        >
+          Enemies
+        </Typography>
+        <Divider variant="fullWidth" />
+        {enemyItems.length === 0 && (
+          <Typography
+            variant="caption"
+            sx={{
+              px: 2,
+              py: 1,
+              display: "inline-block",
+              color: "text.secondary",
+            }}
+          >
+            No enemies on the field
+          </Typography>
+        )}
+
+        <List ref={listRef1} sx={{ py: 0 }}>
+          {enemyItems.map(item => (
+            <InitiativeListItem
+              key={item.id}
+              item={item}
+              onGroupClick={(currentGroup: number) =>
+                handleGroupChange(item.id, currentGroup)
+              }
               onReadyChange={ready => {
                 handleReadyChange(item.id, ready);
               }}

@@ -1,39 +1,56 @@
-.buttonBox {
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  height: 30px;
-}
-
-.buttonBox:hover {
-  /* background-color: aqua; */
-  --tokenOpacity: 0;
-  --closeOpacity: 1;
-}
-
 :root {
-  --tokenOpacity: 1;
-  --closeOpacity: 0;
+  --imageOpacity: 1;
+  --removeButtonOpacity: 0;
+  --changeGroupButtonOpacity: 0;
 }
 
-@property --tokenOpacity {
+.item {
+  visibility: visible;
+}
+
+.item:hover {
+  --changeGroupButtonOpacity: 1;
+  background-color: rgba(187, 153, 255, 0.1);
+}
+
+@property --changeGroupButtonOpacity {
   syntax: "<opacity>";
   initial-value: 0;
 }
 
-@property --closeOpacity {
+.changeGroupButton {
+  opacity: var(--changeGroupButtonOpacity);
+}
+
+.buttonBox {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.buttonBox:hover {
+  --imageOpacity: 0;
+  --removeButtonOpacity: 1;
+}
+
+@property --imageOpacity {
+  syntax: "<opacity>";
+  initial-value: 0;
+}
+
+@property --buttonOpacity {
   syntax: "<opacity>";
   initial-value: 1;
 }
 
 .closeIcon {
   grid-area: 1/1/1/1;
-  opacity: var(--closeOpacity);
+  opacity: var(--removeButtonOpacity);
 }
 
 .tokenIcon {
   grid-area: 1/1/1/1;
-  opacity: var(--tokenOpacity);
+  opacity: var(--imageOpacity);
   pointer-events: none;
 }
 

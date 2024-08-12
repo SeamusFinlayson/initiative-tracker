@@ -12,9 +12,6 @@ import OBR, { isImage, Item, Metadata, Player } from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
 
-import addIcon from "../assets/add.svg";
-import removeIcon from "../assets/remove.svg";
-
 import { InitiativeListItem } from "./InitiativeListItem";
 import { getPluginId } from "../getPluginId";
 import { InitiativeHeader } from "../InitiativeHeader";
@@ -128,7 +125,9 @@ export function InitiativeTracker() {
               name: item.text.plainText || item.name,
               active: metadata.active,
               visible: item.visible,
+              // Unused properties
               ready: true,
+              group: 0,
             });
           }
         }
@@ -138,59 +137,6 @@ export function InitiativeTracker() {
 
     OBR.scene.items.getItems().then(handleItemsChange);
     return OBR.scene.items.onChange(handleItemsChange);
-  }, []);
-
-  useEffect(() => {
-    OBR.contextMenu.create({
-      icons: [
-        {
-          icon: addIcon,
-          label: "Add to Initiative",
-          filter: {
-            every: [
-              { key: "layer", value: "CHARACTER", coordinator: "||" },
-              { key: "layer", value: "MOUNT" },
-              { key: "type", value: "IMAGE" },
-              { key: ["metadata", getPluginId("metadata")], value: undefined },
-            ],
-            permissions: ["UPDATE"],
-          },
-        },
-        {
-          icon: removeIcon,
-          label: "Remove from Initiative",
-          filter: {
-            every: [
-              { key: "layer", value: "CHARACTER", coordinator: "||" },
-              { key: "layer", value: "MOUNT" },
-              { key: "type", value: "IMAGE" },
-            ],
-            permissions: ["UPDATE"],
-          },
-        },
-      ],
-      id: getPluginId("menu/toggle"),
-      onClick(context) {
-        OBR.scene.items.updateItems(context.items, items => {
-          // Check whether to add the items to initiative or remove them
-          const addToInitiative = items.every(
-            item => item.metadata[getPluginId("metadata")] === undefined
-          );
-          let count = 0;
-          for (let item of items) {
-            if (addToInitiative) {
-              item.metadata[getPluginId("metadata")] = {
-                count: `${count}`,
-                active: false,
-              };
-              count += 1;
-            } else {
-              delete item.metadata[getPluginId("metadata")];
-            }
-          }
-        });
-      },
-    });
   }, []);
 
   function handleSortClick() {
@@ -213,7 +159,7 @@ export function InitiativeTracker() {
       sorted.map(init => init.id),
       items => {
         for (let i = 0; i < items.length; i++) {
-          let item = items[i];
+          const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.active = i === nextIndex;
