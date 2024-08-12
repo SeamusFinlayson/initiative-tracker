@@ -27,6 +27,9 @@ import SettingsButton from "../components/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
 import { isPlainObject } from "../isPlainObject";
 
+import ModeEditRoundedIcon from "@mui/icons-material/ModeEditRounded";
+import EditOffRoundedIcon from "@mui/icons-material/EditOffRounded";
+
 /** Check that the item metadata is in the correct format */
 function isMetadata(metadata: unknown): metadata is {
   count: string;
@@ -51,6 +54,7 @@ export function ZipperInitiative() {
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const handlePlayerChange = (player: Player) => {
@@ -273,6 +277,16 @@ export function ZipperInitiative() {
         action={
           <>
             {role === "GM" && <SettingsButton></SettingsButton>}
+            {role === "GM" &&
+              (editMode ? (
+                <IconButton onClick={() => setEditMode(false)}>
+                  <EditOffRoundedIcon />
+                </IconButton>
+              ) : (
+                <IconButton onClick={() => setEditMode(true)}>
+                  <ModeEditRoundedIcon />
+                </IconButton>
+              ))}
             {role === "GM" && (
               <IconButton onClick={handleResetClicked}>
                 <Icon>
@@ -322,6 +336,7 @@ export function ZipperInitiative() {
                 handleReadyChange(item.id, ready);
               }}
               showHidden={role === "GM"}
+              edit={editMode}
             />
           ))}
         </List>
@@ -365,6 +380,7 @@ export function ZipperInitiative() {
                 handleReadyChange(item.id, ready);
               }}
               showHidden={role === "GM"}
+              edit={editMode}
             />
           ))}
         </List>

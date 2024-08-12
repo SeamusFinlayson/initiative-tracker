@@ -1,25 +1,6 @@
 :root {
   --imageOpacity: 1;
   --removeButtonOpacity: 0;
-  --changeGroupButtonOpacity: 0;
-}
-
-.item {
-  visibility: visible;
-}
-
-.item:hover {
-  --changeGroupButtonOpacity: 1;
-  background-color: rgba(187, 153, 255, 0.1);
-}
-
-@property --changeGroupButtonOpacity {
-  syntax: "<opacity>";
-  initial-value: 0;
-}
-
-.changeGroupButton {
-  opacity: var(--changeGroupButtonOpacity);
 }
 
 .buttonBox {

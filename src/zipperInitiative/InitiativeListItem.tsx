@@ -22,11 +22,13 @@ export function InitiativeListItem({
   onReadyChange,
   onGroupClick,
   showHidden,
+  edit,
 }: {
   item: InitiativeItem;
   onReadyChange: (ready: boolean) => void;
   onGroupClick: (currentGroup: number) => void;
   showHidden: boolean;
+  edit: boolean;
 }) {
   if (!item.visible && !showHidden) {
     return null;
@@ -41,33 +43,33 @@ export function InitiativeListItem({
   return (
     <ListItem
       key={item.id}
-      className={"item"}
       secondaryAction={
         <>
-          {showHidden && (
+          {edit ? (
             <IconButton
               className="buttonBox"
               onClick={() => onGroupClick(item.group)}
               onDoubleClick={e => e.stopPropagation()}
             >
               {item.group === 0 ? (
-                <MoveDownRoundedIcon className="changeGroupButton" />
+                <MoveDownRoundedIcon />
               ) : (
-                <MoveUpRoundedIcon className="changeGroupButton" />
+                <MoveUpRoundedIcon />
               )}
             </IconButton>
+          ) : (
+            <Checkbox
+              checkedIcon={<FlagRoundedIcon></FlagRoundedIcon>}
+              icon={<OutlinedFlagRoundedIcon></OutlinedFlagRoundedIcon>}
+              checked={item.ready}
+              onFocus={evt => {
+                handleFocus(evt);
+              }}
+              value={item.count}
+              onChange={e => onReadyChange(e.target.checked)}
+              onDoubleClick={e => e.stopPropagation()}
+            />
           )}
-          <Checkbox
-            checkedIcon={<FlagRoundedIcon></FlagRoundedIcon>}
-            icon={<OutlinedFlagRoundedIcon></OutlinedFlagRoundedIcon>}
-            checked={item.ready}
-            onFocus={evt => {
-              handleFocus(evt);
-            }}
-            value={item.count}
-            onChange={e => onReadyChange(e.target.checked)}
-            onDoubleClick={e => e.stopPropagation()}
-          />
         </>
       }
       divider
