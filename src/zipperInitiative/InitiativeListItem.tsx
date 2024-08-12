@@ -1,41 +1,33 @@
 import ListItem from "@mui/material/ListItem";
-import Input from "@mui/material/Input";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import CloseIcon from "@mui/icons-material/Close";
 
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
+import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
+import OutlinedFlagRoundedIcon from "@mui/icons-material/OutlinedFlagRounded";
 
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
-import { IconButton } from "@mui/material";
+import { Checkbox, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
 import { getPluginId } from "../getPluginId";
 import TokenImage from "../TokenImage";
 
-type InitiativeListItemProps = {
-  item: InitiativeItem;
-  onCountChange: (count: string) => void;
-  showHidden: boolean;
-  darkMode: boolean;
-};
-
 export function InitiativeListItem({
   item,
-  onCountChange,
+  onReadyChange,
   showHidden,
-  darkMode,
-}: InitiativeListItemProps) {
-  const [inputHasFocus, setInputHasFocus] = useState(false);
-  const [inputHasHover, setInputHasHover] = useState(false);
-
+}: {
+  item: InitiativeItem;
+  onReadyChange: (ready: boolean) => void;
+  showHidden: boolean;
+}) {
   if (!item.visible && !showHidden) {
     return null;
   }
 
   async function focusItem() {
-    // TODO: add cool down after item is deleted
     // Deselect the list item text
     window.getSelection()?.removeAllRanges();
 
@@ -76,8 +68,8 @@ export function InitiativeListItem({
     });
   }
 
-  const handleFocus = (target: HTMLInputElement) => {
-    target.select();
+  const handleFocus = (event: any) => {
+    event.target.select();
   };
 
   // const [buttonHasHover, setButtonHasHover] = useState(false);
@@ -86,45 +78,22 @@ export function InitiativeListItem({
     <ListItem
       key={item.id}
       secondaryAction={
-        <Input
-          disableUnderline
-          sx={{ width: 48 }}
-          onFocus={evt => {
-            setInputHasFocus(true);
-            handleFocus(evt.target as HTMLInputElement);
-          }}
-          onBlur={() => setInputHasFocus(false)}
-          onMouseEnter={() => setInputHasHover(true)}
-          onMouseLeave={() => setInputHasHover(false)}
-          inputProps={{
-            sx: {
-              textAlign: inputHasFocus ? "center" : "center",
-              pt: "5px",
-              // paddingX: 1,
-              // width: "40px",
-            },
-            style: {
-              borderRadius: 8,
-              backgroundColor: inputHasFocus
-                ? darkMode
-                  ? "rgba(0,0,0,0.4)"
-                  : "rgba(255,255,255,0.24)"
-                : inputHasHover
-                ? darkMode
-                  ? "rgba(0,0,0,0.15)"
-                  : "rgba(255,255,255,0.12)"
-                : "rgba(0,0,0,0)",
-              // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.2)":"rgba(0,0,0,0)",
-              transition: ".1s",
-            },
-          }}
-          value={item.count}
-          onChange={e => {
-            const newCount = e.target.value;
-            onCountChange(newCount);
-          }}
-          onDoubleClick={e => e.stopPropagation()}
-        />
+        <>
+          <Checkbox
+            checkedIcon={<FlagRoundedIcon></FlagRoundedIcon>}
+            icon={<OutlinedFlagRoundedIcon></OutlinedFlagRoundedIcon>}
+            checked={item.ready}
+            onFocus={evt => {
+              handleFocus(evt);
+            }}
+            value={item.count}
+            onChange={e => {
+              const ready = e.target.checked;
+              onReadyChange(ready);
+            }}
+            onDoubleClick={e => e.stopPropagation()}
+          />
+        </>
       }
       divider
       selected={item.active}

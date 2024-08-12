@@ -1,8 +1,6 @@
 import {
   Box,
   Divider,
-  Input,
-  // LinearProgress,
   Switch,
   SxProps,
   Theme,
@@ -17,19 +15,17 @@ import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
   DISPLAY_ROUND_METADATA_ID,
-  ROUND_COUNT_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
-  DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID,
+  ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
   readBooleanFromMetadata,
 } from "../metadataHelpers";
-import { Height, StayPrimaryLandscape } from "@mui/icons-material";
 
 export default function Settings(): JSX.Element {
   const [sortAscending, setSortAscending] = useState(false);
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
-  const [drawSteelEnabled, setDrawSteelEnabled] = useState(false);
+  const [zipperInitiativeEnabled, setZipperInitiativeEnabled] = useState(false);
   const [initializationDone, setInitializationDone] = useState(false);
 
   useEffect(() => {
@@ -62,11 +58,11 @@ export default function Settings(): JSX.Element {
           disableNotifications
         )
       );
-      setDrawSteelEnabled(
+      setZipperInitiativeEnabled(
         readBooleanFromMetadata(
           roomMetadata,
-          DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID,
-          drawSteelEnabled
+          ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
+          zipperInitiativeEnabled
         )
       );
       setInitializationDone(true);
@@ -170,14 +166,13 @@ export default function Settings(): JSX.Element {
               ></Switch>
             </Box>
             <Box sx={settingRowSx}>
-              <Typography>Draw Steel Initiative</Typography>
+              <Typography>Zipper Initiative</Typography>
               <Switch
-                checked={drawSteelEnabled}
+                checked={zipperInitiativeEnabled}
                 onChange={(_e, value) => {
-                  setDrawSteelEnabled(value);
+                  setZipperInitiativeEnabled(value);
                   OBR.room.setMetadata({
-                    [getPluginId(DRAW_STEEL_INITIATIVE_ENABLED_METADATA_ID)]:
-                      value,
+                    [getPluginId(ZIPPER_INITIATIVE_ENABLED_METADATA_ID)]: value,
                   });
                 }}
               ></Switch>

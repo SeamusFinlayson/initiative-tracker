@@ -5,22 +5,18 @@ import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import Box from "@mui/material/Box";
 
-import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
-import SkipNextRounded from "@mui/icons-material/SkipNextRounded";
+import LoopRoundedIcon from "@mui/icons-material/LoopRounded";
 
 import OBR, { isImage, Item, Metadata, Player } from "@owlbear-rodeo/sdk";
 
-import { InitiativeItem } from "../InitiativeItem";
+import { InitiativeItem, isMetadata } from "../InitiativeItem";
 
 import addIcon from "../assets/add.svg";
 import removeIcon from "../assets/remove.svg";
 
-import { InitiativeListItem } from "./InitiativeListItem";
 import { getPluginId } from "../getPluginId";
 import { InitiativeHeader } from "../InitiativeHeader";
-import { isPlainObject } from "../isPlainObject";
-import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
-import { Button, Icon, useTheme } from "@mui/material";
+import { Icon } from "@mui/material";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -29,24 +25,11 @@ import {
   readNumberFromMetadata,
   ROUND_COUNT_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
-  updateRoundCount,
 } from "../metadataHelpers";
-import SortAscendingIcon from "../assets/SortAscendingIcon";
-import SortDescendingIcon from "../assets/SortDescendingIcon";
 import SettingsButton from "../components/SettingsButton";
+import { InitiativeListItem } from "./InitiativeListItem";
 
-/** Check that the item metadata is in the correct format */
-function isMetadata(
-  metadata: unknown
-): metadata is { count: string; active: boolean } {
-  return (
-    isPlainObject(metadata) &&
-    typeof metadata.count === "string" &&
-    typeof metadata.active === "boolean"
-  );
-}
-
-export function InitiativeTracker() {
+export function ZipperInitiative() {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
   const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
 
@@ -123,12 +106,12 @@ export function InitiativeTracker() {
           if (isMetadata(metadata)) {
             initiativeItems.push({
               id: item.id,
-              count: metadata.count,
-              url: item.image.url,
               name: item.text.plainText || item.name,
-              active: metadata.active,
+              url: item.image.url,
               visible: item.visible,
-              ready: true,
+              active: metadata.active,
+              count: metadata.count,
+              ready: metadata.ready !== undefined ? metadata.ready : true,
             });
           }
         }
@@ -177,7 +160,7 @@ export function InitiativeTracker() {
             item => item.metadata[getPluginId("metadata")] === undefined
           );
           let count = 0;
-          for (let item of items) {
+          for (const item of items) {
             if (addToInitiative) {
               item.metadata[getPluginId("metadata")] = {
                 count: `${count}`,
@@ -193,83 +176,14 @@ export function InitiativeTracker() {
     });
   }, []);
 
-  function handleSortClick() {
-    // Sort items and write order to the scene
-    const sorted = sortList(initiativeItems, sortAscending);
-
-    // Focus first item
-    const nextIndex = 0;
-
-    // Set local items immediately
-    setInitiativeItems(
-      sorted.map((item, index) => ({
-        ...item,
-        active: index === nextIndex,
-      }))
-    );
-
-    // Update the scene items with the new active status
-    OBR.scene.items.updateItems(
-      sorted.map(init => init.id),
-      items => {
-        for (let i = 0; i < items.length; i++) {
-          let item = items[i];
-          const metadata = item.metadata[getPluginId("metadata")];
-          if (isMetadata(metadata)) {
-            metadata.active = i === nextIndex;
-          }
-        }
-      }
-    );
-  }
-
-  function handleDirectionClick(next = true) {
-    // Get the next index to activate
-    const sorted = sortFromOrder(initiativeItems, order);
-    let newIndex =
-      sorted.findIndex(initiative => initiative.active) + (next ? 1 : -1);
-
-    if (newIndex < 0) {
-      newIndex = sorted.length + newIndex;
-      if (advancedControls && displayRound && roundCount > 1)
-        updateRoundCount(roundCount - 1, setRoundCount);
-    } else if (newIndex >= sorted.length) {
-      newIndex = newIndex % sorted.length;
-      if (advancedControls && displayRound)
-        updateRoundCount(roundCount + 1, setRoundCount);
-    }
-
-    // Set local items immediately
-    setInitiativeItems(
-      sorted.map((item, index) => ({
-        ...item,
-        active: index === newIndex,
-      }))
-    );
-
-    // Update the scene items with the new active status
-    OBR.scene.items.updateItems(
-      sorted.map(init => init.id),
-      items => {
-        for (let i = 0; i < items.length; i++) {
-          let item = items[i];
-          const metadata = item.metadata[getPluginId("metadata")];
-          if (isMetadata(metadata)) {
-            metadata.active = i === newIndex;
-          }
-        }
-      }
-    );
-  }
-
-  function handleInitiativeCountChange(id: string, newCount: string) {
+  function handleReadyChange(id: string, ready: boolean) {
     // Set local items immediately
     setInitiativeItems(prev =>
       prev.map(item => {
         if (item.id === id) {
           return {
             ...item,
-            count: newCount,
+            ready: ready,
           };
         } else {
           return item;
@@ -278,13 +192,37 @@ export function InitiativeTracker() {
     );
     // Sync changes over the network
     OBR.scene.items.updateItems([id], items => {
-      for (let item of items) {
+      for (const item of items) {
         const metadata = item.metadata[getPluginId("metadata")];
         if (isMetadata(metadata)) {
-          metadata.count = newCount;
+          metadata.ready = ready;
         }
       }
     });
+  }
+
+  function handleResetClicked() {
+    // Set local items immediately
+    setInitiativeItems(
+      initiativeItems.map(item => ({
+        ...item,
+        ready: true,
+      }))
+    );
+
+    // Update the scene items with the new active status
+    OBR.scene.items.updateItems(
+      initiativeItems.map(init => init.id),
+      items => {
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          const metadata = item.metadata[getPluginId("metadata")];
+          if (isMetadata(metadata)) {
+            metadata.ready = true;
+          }
+        }
+      }
+    );
   }
 
   const zoomMargin = 1; // scroll bar shows up at 90% page zoom w/o this
@@ -322,10 +260,7 @@ export function InitiativeTracker() {
     }
   }, [advancedControls]);
 
-  const order = useOrder();
-  const sortedInitiativeItems = sortFromOrder(initiativeItems, order);
-
-  const themeIsDark = useTheme().palette.mode === "dark";
+  // const themeIsDark = useTheme().palette.mode === "dark";
 
   return (
     <Stack height="100vh">
@@ -338,106 +273,28 @@ export function InitiativeTracker() {
         action={
           <>
             {role === "GM" && <SettingsButton></SettingsButton>}
-            <IconButton onClick={handleSortClick}>
+            <IconButton onClick={handleResetClicked}>
               <Icon>
-                {sortAscending ? (
-                  <SortAscendingIcon darkMode={themeIsDark}></SortAscendingIcon>
-                ) : (
-                  <SortDescendingIcon
-                    darkMode={themeIsDark}
-                  ></SortDescendingIcon>
-                )}
+                <LoopRoundedIcon></LoopRoundedIcon>
               </Icon>
             </IconButton>
-            {!advancedControls && (
-              <IconButton
-                aria-label="next"
-                onClick={() => handleDirectionClick()}
-                disabled={initiativeItems.length === 0}
-              >
-                <SkipNextRounded />
-              </IconButton>
-            )}
           </>
         }
       />
-
       <Box sx={{ overflowY: "auto" }}>
         <List ref={listRef}>
-          {sortedInitiativeItems.map(item => (
+          {initiativeItems.map(item => (
             <InitiativeListItem
               key={item.id}
               item={item}
-              darkMode={themeIsDark}
-              onCountChange={newCount => {
-                handleInitiativeCountChange(item.id, newCount);
+              onReadyChange={ready => {
+                handleReadyChange(item.id, ready);
               }}
               showHidden={role === "GM"}
             />
           ))}
         </List>
       </Box>
-
-      {advancedControls && (
-        <Box
-          sx={{
-            p: 1,
-            display: "flex",
-            justifyContent: "space-evenly",
-            gap: 1,
-          }}
-        >
-          <Box
-            sx={{
-              outline: 1,
-              outlineStyle: "solid",
-              outlineColor: themeIsDark
-                ? "rgba(255,255,255,0.1)"
-                : "rgba(0, 0, 0, 0.12)",
-              // background: "rgba(0,0,0,0.15)",
-              m: 0,
-              borderRadius: 9999,
-              display: "inline-flex",
-            }}
-          >
-            <IconButton
-              aria-label="previous"
-              onClick={() => handleDirectionClick(false)}
-              disabled={initiativeItems.length === 0}
-            >
-              <SkipPreviousRoundedIcon />
-            </IconButton>
-            {displayRound && (
-              <>
-                <Button
-                  color="primary"
-                  sx={{ pl: 1, pr: 1, pb: 0.4, borderRadius: 9999 }}
-                  disabled={role === "PLAYER"}
-                  onClick={() => {
-                    if (role === "GM") {
-                      updateRoundCount(1, setRoundCount);
-                      if (!disableNotifications)
-                        OBR.notification.show(
-                          "Round counter reset. Use Undo to restore the counter.",
-                          "INFO"
-                        );
-                    }
-                  }}
-                >
-                  Round {roundCount}
-                </Button>
-              </>
-            )}
-            <IconButton
-              aria-label="next"
-              onClick={() => handleDirectionClick()}
-              disabled={initiativeItems.length === 0}
-            >
-              <SkipNextRounded />
-            </IconButton>
-          </Box>
-        </Box>
-      )}
     </Stack>
   );
 }

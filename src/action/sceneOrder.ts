@@ -1,5 +1,5 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
-import { InitiativeItem } from "./InitiativeItem";
+import { InitiativeItem } from "../InitiativeItem";
 import { getPluginId } from "../getPluginId";
 import { useEffect, useState } from "react";
 
@@ -45,7 +45,7 @@ export function useOrder() {
 /** Extract order object from scene metadata. */
 function getOrder(sceneMetadata: Metadata) {
   try {
-    const orderMetadata: Object = JSON.parse(JSON.stringify(sceneMetadata))[
+    const orderMetadata: object = JSON.parse(JSON.stringify(sceneMetadata))[
       getPluginId("order")
     ];
     return orderMetadata;
@@ -55,7 +55,7 @@ function getOrder(sceneMetadata: Metadata) {
 }
 
 /** Sorts the items items according to the order retrieved from the scene. */
-export function sortFromOrder(items: InitiativeItem[], order: Object) {
+export function sortFromOrder(items: InitiativeItem[], order: object) {
   // Ensure order object is valid
   if (typeof order === "undefined") {
     return items;
@@ -66,7 +66,7 @@ export function sortFromOrder(items: InitiativeItem[], order: Object) {
   }
 
   // Add sorted items to the initiative list
-  let newItems: InitiativeItem[] = [];
+  const newItems: InitiativeItem[] = [];
   for (let i = 0; i < values.length; i++) {
     const item = items.find(item => item.id === values[i]);
     if (typeof item !== "undefined") {
