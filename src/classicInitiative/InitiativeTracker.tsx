@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 import SkipPreviousRoundedIcon from "@mui/icons-material/SkipPreviousRounded";
 import SkipNextRounded from "@mui/icons-material/SkipNextRounded";
 
-import OBR, { isImage, Item, Metadata, Player } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, Item, Metadata } from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
 
@@ -43,9 +43,8 @@ function isMetadata(
   );
 }
 
-export function InitiativeTracker() {
+export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
-  const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
 
   const [roundCount, setRoundCount] = useState(1);
 
@@ -53,14 +52,6 @@ export function InitiativeTracker() {
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
-
-  useEffect(() => {
-    const handlePlayerChange = (player: Player) => {
-      setRole(player.role);
-    };
-    OBR.player.getRole().then(setRole);
-    return OBR.player.onChange(handlePlayerChange);
-  }, []);
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -198,7 +189,7 @@ export function InitiativeTracker() {
       sorted.map(init => init.id),
       items => {
         for (let i = 0; i < items.length; i++) {
-          let item = items[i];
+          const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.active = i === newIndex;
@@ -224,7 +215,7 @@ export function InitiativeTracker() {
     );
     // Sync changes over the network
     OBR.scene.items.updateItems([id], items => {
-      for (let item of items) {
+      for (const item of items) {
         const metadata = item.metadata[getPluginId("metadata")];
         if (isMetadata(metadata)) {
           metadata.count = newCount;

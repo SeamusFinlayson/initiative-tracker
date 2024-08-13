@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 
 import LoopRoundedIcon from "@mui/icons-material/LoopRounded";
 
-import OBR, { isImage, Item, Metadata, Player } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, Item, Metadata } from "@owlbear-rodeo/sdk";
 
 import { InitiativeItem } from "../InitiativeItem";
 
@@ -15,13 +15,10 @@ import { getPluginId } from "../getPluginId";
 import { InitiativeHeader } from "../InitiativeHeader";
 import { Divider, Icon, Typography } from "@mui/material";
 import {
-  ADVANCED_CONTROLS_METADATA_ID,
-  DISABLE_NOTIFICATION_METADATA_ID,
   DISPLAY_ROUND_METADATA_ID,
   readBooleanFromMetadata,
   readNumberFromMetadata,
   ROUND_COUNT_METADATA_ID,
-  SORT_ASCENDING_METADATA_ID,
 } from "../metadataHelpers";
 import SettingsButton from "../components/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
@@ -44,25 +41,13 @@ function isMetadata(metadata: unknown): metadata is {
   );
 }
 
-export function ZipperInitiative() {
+export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
-  const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
 
   const [roundCount, setRoundCount] = useState(1);
-
-  const [sortAscending, setSortAscending] = useState(false);
-  const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
-  const [disableNotifications, setDisableNotifications] = useState(false);
-  const [editMode, setEditMode] = useState(false);
 
-  useEffect(() => {
-    const handlePlayerChange = (player: Player) => {
-      setRole(player.role);
-    };
-    OBR.player.getRole().then(setRole);
-    return OBR.player.onChange(handlePlayerChange);
-  }, []);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -80,32 +65,11 @@ export function ZipperInitiative() {
 
   useEffect(() => {
     const handleRoomMetadataChange = (roomMetadata: Metadata) => {
-      setSortAscending(
-        readBooleanFromMetadata(
-          roomMetadata,
-          SORT_ASCENDING_METADATA_ID,
-          sortAscending
-        )
-      );
-      setAdvancedControls(
-        readBooleanFromMetadata(
-          roomMetadata,
-          ADVANCED_CONTROLS_METADATA_ID,
-          advancedControls
-        )
-      );
       setDisplayRound(
         readBooleanFromMetadata(
           roomMetadata,
           DISPLAY_ROUND_METADATA_ID,
           displayRound
-        )
-      );
-      setDisableNotifications(
-        readBooleanFromMetadata(
-          roomMetadata,
-          DISABLE_NOTIFICATION_METADATA_ID,
-          disableNotifications
         )
       );
     };
@@ -148,21 +112,30 @@ export function ZipperInitiative() {
           return {
             ...item,
             ready: ready,
+            active: ready ? false : true,
           };
         } else {
-          return item;
+          return { ...item, active: false };
         }
       })
     );
     // Sync changes over the network
-    OBR.scene.items.updateItems([id], items => {
-      for (const item of items) {
-        const metadata = item.metadata[getPluginId("metadata")];
-        if (isMetadata(metadata)) {
-          metadata.ready = ready;
+    OBR.scene.items.updateItems(
+      initiativeItems.map(item => item.id),
+      items => {
+        for (const item of items) {
+          const metadata = item.metadata[getPluginId("metadata")];
+          if (isMetadata(metadata)) {
+            if (item.id === id) {
+              metadata.ready = ready;
+              metadata.active = ready ? false : true;
+            } else {
+              metadata.active = false;
+            }
+          }
         }
       }
-    });
+    );
   }
 
   function handleGroupChange(id: string, currentGroup: number) {
@@ -197,6 +170,7 @@ export function ZipperInitiative() {
       initiativeItems.map(item => ({
         ...item,
         ready: true,
+        active: false,
       }))
     );
 
@@ -209,6 +183,7 @@ export function ZipperInitiative() {
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.ready = true;
+            metadata.active = false;
           }
         }
       }
@@ -216,7 +191,7 @@ export function ZipperInitiative() {
   }
 
   const zoomMargin = 1; // scroll bar shows up at 90% page zoom w/o this
-  const advancedControlsHeight = 56;
+  const roundCountHeight = 56;
   const listRef0 = useRef<HTMLUListElement>(null);
   const listRef1 = useRef<HTMLUListElement>(null);
   const listRefs: React.RefObject<HTMLUListElement>[] = [listRef0, listRef1];
@@ -260,16 +235,17 @@ export function ZipperInitiative() {
         });
         // Reset height when unmounted
         OBR.action.setHeight(
-          129 + zoomMargin + (advancedControls ? advancedControlsHeight : 0)
+          129 + zoomMargin + (roundCount ? roundCountHeight : 0)
         );
       };
     }
-  }, [advancedControls]);
-
-  // const themeIsDark = useTheme().palette.mode === "dark";
+  }, [roundCount]);
 
   const partyItems = initiativeItems.filter(item => item.group === 0);
   const enemyItems = initiativeItems.filter(item => item.group === 1);
+
+  const allEnemiesHidden = enemyItems.findIndex(value => value.visible) === -1;
+  const roundFinished = initiativeItems.findIndex(value => value.ready) === -1;
 
   return (
     <Stack height="100vh">
@@ -277,23 +253,24 @@ export function ZipperInitiative() {
         action={
           <>
             {role === "GM" && <SettingsButton></SettingsButton>}
-            {role === "GM" &&
-              (editMode ? (
-                <IconButton onClick={() => setEditMode(false)}>
-                  <EditOffRoundedIcon />
-                </IconButton>
-              ) : (
-                <IconButton onClick={() => setEditMode(true)}>
-                  <ModeEditRoundedIcon />
-                </IconButton>
-              ))}
-            {role === "GM" && (
-              <IconButton onClick={handleResetClicked}>
-                <Icon>
-                  <LoopRoundedIcon></LoopRoundedIcon>
-                </Icon>
+
+            {editMode ? (
+              <IconButton onClick={() => setEditMode(false)}>
+                <EditOffRoundedIcon />
+              </IconButton>
+            ) : (
+              <IconButton onClick={() => setEditMode(true)}>
+                <ModeEditRoundedIcon />
               </IconButton>
             )}
+            <IconButton
+              onClick={handleResetClicked}
+              disabled={role === "PLAYER"}
+            >
+              <Icon color={roundFinished ? "primary" : undefined}>
+                <LoopRoundedIcon></LoopRoundedIcon>
+              </Icon>
+            </IconButton>
           </>
         }
       />
@@ -321,7 +298,9 @@ export function ZipperInitiative() {
               color: "text.secondary",
             }}
           >
-            The party seems to be empty
+            {Math.random() < 0.1 && enemyItems.length !== 0 && !allEnemiesHidden
+              ? "I need a hero!"
+              : "The party seems to be empty..."}
           </Typography>
         )}
         <List ref={listRef0} sx={{ py: 0 }}>
@@ -351,10 +330,10 @@ export function ZipperInitiative() {
             color: "text.secondary",
           }}
         >
-          Enemies
+          Adversaries
         </Typography>
         <Divider variant="fullWidth" />
-        {enemyItems.length === 0 && (
+        {(enemyItems.length === 0 || (allEnemiesHidden && role !== "GM")) && (
           <Typography
             variant="caption"
             sx={{
@@ -364,7 +343,9 @@ export function ZipperInitiative() {
               color: "text.secondary",
             }}
           >
-            No enemies on the field
+            {partyItems.length === 0
+              ? "The action must be elsewhere..."
+              : "The party stands uncontested"}
           </Typography>
         )}
 

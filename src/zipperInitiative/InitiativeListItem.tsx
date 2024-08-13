@@ -21,7 +21,7 @@ export function InitiativeListItem({
   item,
   onReadyChange,
   onGroupClick,
-  showHidden,
+  showHidden: roleIsGm,
   edit,
 }: {
   item: InitiativeItem;
@@ -30,15 +30,14 @@ export function InitiativeListItem({
   showHidden: boolean;
   edit: boolean;
 }) {
-  if (!item.visible && !showHidden) {
+  if (!item.visible && !roleIsGm) {
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFocus = (event: any) => {
     event.target.select();
   };
-
-  // const [buttonHasHover, setButtonHasHover] = useState(false);
 
   return (
     <ListItem
@@ -68,11 +67,13 @@ export function InitiativeListItem({
               value={item.count}
               onChange={e => onReadyChange(e.target.checked)}
               onDoubleClick={e => e.stopPropagation()}
+              disabled={item.group === 1 && !roleIsGm}
             />
           )}
         </>
       }
       divider
+      selected={item.active}
       sx={{
         padding: 1,
         pl: "12px",
@@ -82,7 +83,7 @@ export function InitiativeListItem({
     >
       <Box
         component={"div"}
-        className={!item.visible && showHidden ? "hiddenGrid" : "standardGrid"}
+        className={!item.visible && roleIsGm ? "hiddenGrid" : "standardGrid"}
       >
         <IconButton
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
@@ -99,7 +100,7 @@ export function InitiativeListItem({
           </div>
         </IconButton>
 
-        {!item.visible && showHidden && (
+        {!item.visible && roleIsGm && (
           <ListItemIcon sx={{ minWidth: "20px", opacity: "0.5" }}>
             <VisibilityOffRounded fontSize="small" />
           </ListItemIcon>
@@ -107,8 +108,7 @@ export function InitiativeListItem({
         <Box
           component="div"
           sx={{
-            color:
-              !item.visible && showHidden ? "text.disabled" : "text.primary",
+            color: !item.visible && roleIsGm ? "text.disabled" : "text.primary",
             pb: "2px",
           }}
         >

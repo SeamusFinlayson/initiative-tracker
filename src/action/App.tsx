@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import OBR, { Metadata } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Player } from "@owlbear-rodeo/sdk";
 import { InitiativeHeader } from "../InitiativeHeader";
-import { InitiativeTracker } from "./InitiativeTracker";
+import { InitiativeTracker } from "../classicInitiative/InitiativeTracker";
 import {
   readBooleanFromMetadata,
   ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
@@ -19,9 +19,19 @@ const removeIcon = new URL(
 export function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [zipperInitiativeEnabled, setZipperInitiativeEnabled] = useState(false);
+  const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
+
   useEffect(() => {
     OBR.scene.isReady().then(setSceneReady);
     return OBR.scene.onReadyChange(setSceneReady);
+  }, []);
+
+  useEffect(() => {
+    const handlePlayerChange = (player: Player) => {
+      setRole(player.role);
+    };
+    OBR.player.getRole().then(setRole);
+    return OBR.player.onChange(handlePlayerChange);
   }, []);
 
   useEffect(() => {
@@ -84,6 +94,7 @@ export function App() {
                 item.metadata[getPluginId("metadata")] = {
                   count: `${count}`,
                   active: false,
+                  group: role === "GM" ? 1 : 0,
                 };
                 count += 1;
               } else {
@@ -94,7 +105,7 @@ export function App() {
         },
       });
     });
-  }, []);
+  }, [role]);
 
   // Show a basic header when the scene isn't ready
   if (!sceneReady) {
@@ -103,7 +114,7 @@ export function App() {
     );
   }
 
-  if (zipperInitiativeEnabled) return <ZipperInitiative />;
+  if (zipperInitiativeEnabled) return <ZipperInitiative role={role} />;
 
-  return <InitiativeTracker />;
+  return <InitiativeTracker role={role} />;
 }
