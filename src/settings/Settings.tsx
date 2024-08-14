@@ -166,7 +166,7 @@ export default function Settings(): JSX.Element {
               ></Switch>
             </Box>
             <Box sx={settingRowSx}>
-              <Typography>Ping-pong initiative</Typography>
+              <Typography>Alternating initiative</Typography>
               <Switch
                 checked={zipperInitiativeEnabled}
                 onChange={(_e, value) => {
