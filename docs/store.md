@@ -23,7 +23,7 @@ Features:
 - The initiative can be sorted in ascending or descending order using the sort button
 - The initiative value input has hover and focus highlights
 - The current round can be tracked
-- You can use zipper style initiative (useful for the Draw Steel RPG)
+- You can use ping-pong style initiative (useful for the Draw Steel RPG)
 
 ## How it Works
 
@@ -37,11 +37,11 @@ To change the initiative order you can change its initiative in the action popov
 
 You can move through the initiative order by clicking the arrow icon in the top of the extension popover.
 
-## Zipper Initiative
+## Ping-Pong Initiative
 
 A more free form and tactical initiative system where the party and their adversaries alternate taking turns.
 
-![Zipper Initiative](https://github.com/user-attachments/assets/90d004f6-b5f5-404c-8147-5d4cb205655e)
+![Ping-Pong Initiative](https://github.com/user-attachments/assets/90d004f6-b5f5-404c-8147-5d4cb205655e)
 
 This can be enabled through the settings menu.
 
