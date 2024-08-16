@@ -15,9 +15,11 @@ import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
   DISPLAY_ROUND_METADATA_ID,
+  SELECT_ACTIVE_ITEM_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
   ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
   readBooleanFromMetadata,
+  readNumberFromMetadata,
 } from "../metadataHelpers";
 
 export default function Settings(): JSX.Element {
@@ -27,6 +29,7 @@ export default function Settings(): JSX.Element {
   const [disableNotifications, setDisableNotifications] = useState(false);
   const [zipperInitiativeEnabled, setZipperInitiativeEnabled] = useState(false);
   const [initializationDone, setInitializationDone] = useState(false);
+  const [selectActiveItem, setSelectActiveItem] = useState(0);
 
   useEffect(() => {
     const handleRoomMetadataChange = (roomMetadata: Metadata) => {
@@ -63,6 +66,13 @@ export default function Settings(): JSX.Element {
           roomMetadata,
           ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
           zipperInitiativeEnabled
+        )
+      );
+      setSelectActiveItem(
+        readNumberFromMetadata(
+          roomMetadata,
+          SELECT_ACTIVE_ITEM_METADATA_ID,
+          selectActiveItem
         )
       );
       setInitializationDone(true);
@@ -173,6 +183,19 @@ export default function Settings(): JSX.Element {
                   setZipperInitiativeEnabled(value);
                   OBR.room.setMetadata({
                     [getPluginId(ZIPPER_INITIATIVE_ENABLED_METADATA_ID)]: value,
+                  });
+                }}
+              ></Switch>
+            </Box>
+            <Box sx={settingRowSx}>
+              <Typography>Select active item</Typography>
+              <Switch
+                checked={selectActiveItem === 1 ? true : false}
+                onChange={(_e, checked) => {
+                  const value = checked ? 1 : 0;
+                  setSelectActiveItem(value);
+                  OBR.room.setMetadata({
+                    [getPluginId(SELECT_ACTIVE_ITEM_METADATA_ID)]: value,
                   });
                 }}
               ></Switch>

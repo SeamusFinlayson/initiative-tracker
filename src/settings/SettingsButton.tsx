@@ -11,7 +11,7 @@ export default function SettingsButton(): JSX.Element {
           id: getPluginId("settings"),
           url: "/src/settings/settings.html",
           width: 400,
-          height: 326,
+          height: 364,
         })
       }
     >
