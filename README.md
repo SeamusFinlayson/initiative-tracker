@@ -44,7 +44,7 @@ This can be enabled through the settings menu.
 This is inspired by how initiative in Draw Steel, the MCDM RPG, works but I run a D&D 5E game so here is how I am using this in my game:
 
 - One player (the one with the best initiative) rolls against a monster (the one with the best initiative) to decide which side goes first
-- The side that goes first decides amongst themselves which character takes their turn, click the flag beside that character, then the other side does the same
+- The side that goes first decides amongst themselves which character takes their turn (click the flag beside that character) then the other side does the same
 - The two sides continue alternating turns like this until one side is out of characters
 - The side that still has characters who have not acted takes all their remaining turns
 - Reset the initiative for the next round, the side that won the initiative contest at the beginning acts first again
