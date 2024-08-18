@@ -1,12 +1,17 @@
 import OBR, { Vector2, Math2 } from "@owlbear-rodeo/sdk";
 
+export async function deselectText() {
+  // Deselect the list item text
+  window.getSelection()?.removeAllRanges();
+}
+
 export async function selectItem(itemId: string) {
   OBR.player.select([itemId]);
 }
 
 export async function focusItem(itemId: string) {
-  // Deselect the list item text
-  window.getSelection()?.removeAllRanges();
+  // User may have selected text by double clicking on the initiative item
+  deselectText();
 
   // Select this item
   await selectItem(itemId);

@@ -25,12 +25,14 @@ import {
   readBooleanFromMetadata,
   readNumberFromMetadata,
   ROUND_COUNT_METADATA_ID,
+  SELECT_ACTIVE_ITEM_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
   updateRoundCount,
 } from "../metadataHelpers";
 import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
-import SettingsButton from "../components/SettingsButton";
+import SettingsButton from "../settings/SettingsButton";
+import { selectItem } from "../findItem";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -52,6 +54,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
+  const [selectActiveItem, setSelectActiveItem] = useState(0);
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -97,6 +100,13 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
           disableNotifications
         )
       );
+      setSelectActiveItem(
+        readNumberFromMetadata(
+          roomMetadata,
+          SELECT_ACTIVE_ITEM_METADATA_ID,
+          selectActiveItem
+        )
+      );
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
     return OBR.room.onMetadataChange(handleRoomMetadataChange);
@@ -139,10 +149,14 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
     // Set local items immediately
     setInitiativeItems(
-      sorted.map((item, index) => ({
-        ...item,
-        active: index === nextIndex,
-      }))
+      sorted.map((item, index) => {
+        const active = index === 0;
+        if (selectActiveItem === 1 && active) selectItem(item.id);
+        return {
+          ...item,
+          active,
+        };
+      })
     );
 
     // Update the scene items with the new active status
@@ -178,10 +192,14 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
     // Set local items immediately
     setInitiativeItems(
-      sorted.map((item, index) => ({
-        ...item,
-        active: index === newIndex,
-      }))
+      sorted.map((item, index) => {
+        const active = index === newIndex;
+        if (selectActiveItem === 1 && active) selectItem(item.id);
+        return {
+          ...item,
+          active,
+        };
+      })
     );
 
     // Update the scene items with the new active status

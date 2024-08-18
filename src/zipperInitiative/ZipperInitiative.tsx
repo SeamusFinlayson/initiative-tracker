@@ -16,16 +16,21 @@ import { InitiativeHeader } from "../InitiativeHeader";
 import { Divider, Icon, Typography } from "@mui/material";
 import {
   DISPLAY_ROUND_METADATA_ID,
+  PREVIOUS_STACK_METADATA_ID,
   readBooleanFromMetadata,
   readNumberFromMetadata,
+  readStringArrayFromMetadata,
   ROUND_COUNT_METADATA_ID,
+  SELECT_ACTIVE_ITEM_METADATA_ID,
 } from "../metadataHelpers";
-import SettingsButton from "../components/SettingsButton";
+import SettingsButton from "../settings/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
 import { isPlainObject } from "../isPlainObject";
 
 import ModeEditRoundedIcon from "@mui/icons-material/ModeEditRounded";
 import EditOffRoundedIcon from "@mui/icons-material/EditOffRounded";
+import { selectItem } from "../findItem";
+import { writePreviousStackToScene } from "./previousStack";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(metadata: unknown): metadata is {
@@ -43,9 +48,11 @@ function isMetadata(metadata: unknown): metadata is {
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
+  const [previousStack, setPreviousStack] = useState<string[]>([]);
 
   const [roundCount, setRoundCount] = useState(1);
   const [displayRound, setDisplayRound] = useState(false);
+  const [selectActiveItem, setSelectActiveItem] = useState(0);
 
   const [editMode, setEditMode] = useState(false);
 
@@ -57,6 +64,9 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           ROUND_COUNT_METADATA_ID,
           roundCount
         )
+      );
+      setPreviousStack(
+        readStringArrayFromMetadata(sceneMetadata, PREVIOUS_STACK_METADATA_ID)
       );
     };
     OBR.scene.getMetadata().then(handleSceneMetadataChange);
@@ -70,6 +80,13 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           roomMetadata,
           DISPLAY_ROUND_METADATA_ID,
           displayRound
+        )
+      );
+      setSelectActiveItem(
+        readNumberFromMetadata(
+          roomMetadata,
+          SELECT_ACTIVE_ITEM_METADATA_ID,
+          selectActiveItem
         )
       );
     };
@@ -104,22 +121,48 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
     return OBR.scene.items.onChange(handleItemsChange);
   }, []);
 
-  function handleReadyChange(id: string, ready: boolean) {
-    // Set local items immediately
+  function handleReadyChange(id: string, ready: boolean, previousId: string) {
+    const newActive = !ready;
+    // Set local items immediately and update previous stack
     setInitiativeItems(prev =>
       prev.map(item => {
         if (item.id === id) {
+          // Highlight ready item on map
+          if (selectActiveItem === 1 && !ready) selectItem(id);
+
+          // Update item locally
           return {
             ...item,
             ready: ready,
-            active: ready ? false : true,
+            active: newActive,
           };
         } else {
+          // Update item locally
           return { ...item, active: false };
         }
       })
     );
-    // Sync changes over the network
+
+    if (newActive) {
+      // Record that this item went at this point
+      const newPreviousStack = [...previousStack, id];
+      setPreviousStack(newPreviousStack);
+      writePreviousStackToScene(newPreviousStack);
+    } else {
+      // Restore previous initiative item
+      const newPreviousStack = previousStack.slice(0, -1);
+      setPreviousStack(newPreviousStack);
+      writePreviousStackToScene(newPreviousStack);
+      setInitiativeItems(prev =>
+        prev.map(item => {
+          if (item.id === previousId) {
+            return { ...item, active: true };
+          } else return { ...item };
+        })
+      );
+    }
+
+    // Sync item changes over the network
     OBR.scene.items.updateItems(
       initiativeItems.map(item => item.id),
       items => {
@@ -128,7 +171,9 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           if (isMetadata(metadata)) {
             if (item.id === id) {
               metadata.ready = ready;
-              metadata.active = ready ? false : true;
+              metadata.active = newActive;
+            } else if (!newActive && item.id === previousId) {
+              metadata.active = true;
             } else {
               metadata.active = false;
             }
@@ -165,6 +210,10 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   }
 
   function handleResetClicked() {
+    // Clear previous stack
+    setPreviousStack([]);
+    writePreviousStackToScene([]);
+
     // Set local items immediately
     setInitiativeItems(
       initiativeItems.map(item => ({
@@ -265,7 +314,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
             )}
             <IconButton
               onClick={handleResetClicked}
-              disabled={role === "PLAYER"}
+              disabled={role === "PLAYER" && !roundFinished}
             >
               <Icon color={roundFinished ? "primary" : undefined}>
                 <LoopRoundedIcon></LoopRoundedIcon>
@@ -312,7 +361,13 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
                 handleGroupChange(item.id, currentGroup)
               }
               onReadyChange={ready => {
-                handleReadyChange(item.id, ready);
+                handleReadyChange(
+                  item.id,
+                  ready,
+                  previousStack.length > 1
+                    ? (previousStack.at(previousStack.length - 2) as string)
+                    : ""
+                );
               }}
               showHidden={role === "GM"}
               edit={editMode}
@@ -358,7 +413,13 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
                 handleGroupChange(item.id, currentGroup)
               }
               onReadyChange={ready => {
-                handleReadyChange(item.id, ready);
+                handleReadyChange(
+                  item.id,
+                  ready,
+                  previousStack.length > 1
+                    ? (previousStack.at(previousStack.length - 2) as string)
+                    : ""
+                );
               }}
               showHidden={role === "GM"}
               edit={editMode}
