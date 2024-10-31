@@ -144,7 +144,7 @@ export default function Settings(): JSX.Element {
             <div className="flex flex-col gap-2">
               <SettingsRow
                 label="Current Turn"
-                description="Add an effect to highlight the active item"
+                description="Add an effect to highlight the active token"
                 action={
                   <div className="flex min-w-24 justify-end">
                     <Select
@@ -199,7 +199,7 @@ export default function Settings(): JSX.Element {
             {!zipperInitiativeEnabled && (
               <>
                 <div className="mb-1 mt-4">
-                  <Typography>Classic Initiative</Typography>
+                  <Typography>Counting Initiative</Typography>
                 </div>
                 <div className="flex flex-col gap-2">
                   <SettingsRow
@@ -245,7 +245,7 @@ export default function Settings(): JSX.Element {
                   >
                     <SubSettingsRow
                       label="Round Counter"
-                      description="Display the current Round"
+                      description="Display the current round"
                       action={
                         <Switch
                           color="secondary"
