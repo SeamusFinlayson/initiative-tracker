@@ -10,9 +10,9 @@ export default function SettingsButton(): JSX.Element {
       onClick={() =>
         OBR.popover.open({
           id: getPluginId("settings"),
-          url: `/src/settings/settings.html?mode=${mode}`,
+          url: `/src/settings/settings.html?themeMode=${mode}`,
           width: 400,
-          height: 580,
+          height: 500,
           hidePaper: false,
         })
       }

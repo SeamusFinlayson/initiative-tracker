@@ -32,11 +32,11 @@ import {
 import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
 import SettingsButton from "../settings/SettingsButton";
-import { selectItem } from "../findItem";
+import { labelItem, selectItem } from "../findItem";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
-  metadata: unknown
+  metadata: unknown,
 ): metadata is { count: string; active: boolean } {
   return (
     isPlainObject(metadata) &&
@@ -46,15 +46,18 @@ function isMetadata(
 }
 
 export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
-  const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
+  // General settings
+  const [selectActiveItem, setSelectActiveItem] = useState(0);
 
-  const [roundCount, setRoundCount] = useState(1);
-
+  // Classic initiative settings
   const [sortAscending, setSortAscending] = useState(false);
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
-  const [selectActiveItem, setSelectActiveItem] = useState(0);
+
+  // Initiative
+  const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
+  const [roundCount, setRoundCount] = useState(1);
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -62,8 +65,8 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
         readNumberFromMetadata(
           sceneMetadata,
           ROUND_COUNT_METADATA_ID,
-          roundCount
-        )
+          roundCount,
+        ),
       );
     };
     OBR.scene.getMetadata().then(handleSceneMetadataChange);
@@ -76,36 +79,36 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
         readBooleanFromMetadata(
           roomMetadata,
           SORT_ASCENDING_METADATA_ID,
-          sortAscending
-        )
+          sortAscending,
+        ),
       );
       setAdvancedControls(
         readBooleanFromMetadata(
           roomMetadata,
           ADVANCED_CONTROLS_METADATA_ID,
-          advancedControls
-        )
+          advancedControls,
+        ),
       );
       setDisplayRound(
         readBooleanFromMetadata(
           roomMetadata,
           DISPLAY_ROUND_METADATA_ID,
-          displayRound
-        )
+          displayRound,
+        ),
       );
       setDisableNotifications(
         readBooleanFromMetadata(
           roomMetadata,
           DISABLE_NOTIFICATION_METADATA_ID,
-          disableNotifications
-        )
+          disableNotifications,
+        ),
       );
       setSelectActiveItem(
         readNumberFromMetadata(
           roomMetadata,
           SELECT_ACTIVE_ITEM_METADATA_ID,
-          selectActiveItem
-        )
+          selectActiveItem,
+        ),
       );
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
@@ -152,17 +155,18 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
       sorted.map((item, index) => {
         const active = index === 0;
         if (selectActiveItem === 1 && active) selectItem(item.id);
+        if (selectActiveItem === 2 && active) labelItem(item.id);
         return {
           ...item,
           active,
         };
-      })
+      }),
     );
 
     // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      sorted.map(init => init.id),
-      items => {
+      sorted.map((init) => init.id),
+      (items) => {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
@@ -170,7 +174,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
             metadata.active = i === nextIndex;
           }
         }
-      }
+      },
     );
   }
 
@@ -178,7 +182,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
     // Get the next index to activate
     const sorted = sortFromOrder(initiativeItems, order);
     let newIndex =
-      sorted.findIndex(initiative => initiative.active) + (next ? 1 : -1);
+      sorted.findIndex((initiative) => initiative.active) + (next ? 1 : -1);
 
     if (newIndex < 0) {
       newIndex = sorted.length + newIndex;
@@ -195,17 +199,18 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
       sorted.map((item, index) => {
         const active = index === newIndex;
         if (selectActiveItem === 1 && active) selectItem(item.id);
+        if (selectActiveItem === 2 && active) labelItem(item.id);
         return {
           ...item,
           active,
         };
-      })
+      }),
     );
 
     // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      sorted.map(init => init.id),
-      items => {
+      sorted.map((init) => init.id),
+      (items) => {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
@@ -213,14 +218,14 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
             metadata.active = i === newIndex;
           }
         }
-      }
+      },
     );
   }
 
   function handleInitiativeCountChange(id: string, newCount: string) {
     // Set local items immediately
-    setInitiativeItems(prev =>
-      prev.map(item => {
+    setInitiativeItems((prev) =>
+      prev.map((item) => {
         if (item.id === id) {
           return {
             ...item,
@@ -229,10 +234,10 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
         } else {
           return item;
         }
-      })
+      }),
     );
     // Sync changes over the network
-    OBR.scene.items.updateItems([id], items => {
+    OBR.scene.items.updateItems([id], (items) => {
       for (const item of items) {
         const metadata = item.metadata[getPluginId("metadata")];
         if (isMetadata(metadata)) {
@@ -247,7 +252,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   const listRef = useRef<HTMLUListElement>(null);
   useEffect(() => {
     if (listRef.current && ResizeObserver) {
-      const resizeObserver = new ResizeObserver(entries => {
+      const resizeObserver = new ResizeObserver((entries) => {
         if (entries.length > 0) {
           const entry = entries[0];
           // Get the height of the border box
@@ -262,7 +267,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
               64 +
               1 +
               zoomMargin +
-              (advancedControls ? advancedControlsHeight : 0)
+              (advancedControls ? advancedControlsHeight : 0),
           );
         }
       });
@@ -271,7 +276,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
         resizeObserver.disconnect();
         // Reset height when unmounted
         OBR.action.setHeight(
-          129 + zoomMargin + (advancedControls ? advancedControlsHeight : 0)
+          129 + zoomMargin + (advancedControls ? advancedControlsHeight : 0),
         );
       };
     }
@@ -319,12 +324,12 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
       <Box sx={{ overflowY: "auto" }}>
         <List ref={listRef}>
-          {sortedInitiativeItems.map(item => (
+          {sortedInitiativeItems.map((item) => (
             <InitiativeListItem
               key={item.id}
               item={item}
               darkMode={themeIsDark}
-              onCountChange={newCount => {
+              onCountChange={(newCount) => {
                 handleInitiativeCountChange(item.id, newCount);
               }}
               showHidden={role === "GM"}
@@ -374,7 +379,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
                       if (!disableNotifications)
                         OBR.notification.show(
                           "Round counter reset. Use Undo to restore the counter.",
-                          "INFO"
+                          "INFO",
                         );
                     }
                   }}

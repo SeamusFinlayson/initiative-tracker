@@ -1,4 +1,4 @@
-import OBR, { Vector2, Math2 } from "@owlbear-rodeo/sdk";
+import OBR, { Vector2, Math2, buildLabel } from "@owlbear-rodeo/sdk";
 
 export async function deselectText() {
   // Deselect the list item text
@@ -34,9 +34,8 @@ export async function focusItem(itemId: string) {
   const absoluteCenter = Math2.subtract(boundsAbsoluteCenter, viewportCenter);
 
   // Convert the center to world-space
-  const relativeCenter = await OBR.viewport.inverseTransformPoint(
-    absoluteCenter
-  );
+  const relativeCenter =
+    await OBR.viewport.inverseTransformPoint(absoluteCenter);
 
   // Invert and scale the world-space position to match a viewport position offset
   const viewportScale = await OBR.viewport.getScale();
@@ -46,4 +45,39 @@ export async function focusItem(itemId: string) {
     scale: viewportScale,
     position: viewportPosition,
   });
+}
+
+const labelId = "prettySordidActiveLabel";
+
+export async function labelItem(itemId: string) {
+  const bounds = await OBR.scene.items.getItemBounds([itemId]);
+  const sceneDpi = await OBR.scene.grid.getDpi();
+
+  const label = buildLabel()
+    .id(labelId)
+    .position({
+      x: bounds.center.x,
+      y: bounds.min.y - sceneDpi / 30,
+    })
+    .style({
+      backgroundColor: "#3D4051",
+      backgroundOpacity: 0.7,
+      cornerRadius: 8,
+      pointerDirection: "DOWN",
+      pointerWidth: (sceneDpi / 150) * 8,
+      pointerHeight: (sceneDpi / 150) * 8,
+    })
+    .maxViewScale(1.5)
+    .minViewScale(0.8)
+    .backgroundOpacity(1)
+    .plainText("Your Turn!")
+    .attachedTo(itemId)
+    .locked(true)
+    .build();
+
+  OBR.scene.items.addItems([label]);
+}
+
+export async function removeLabel() {
+  OBR.scene.local.deleteItems([labelId]);
 }
