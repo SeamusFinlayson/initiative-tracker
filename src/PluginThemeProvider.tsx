@@ -18,7 +18,7 @@ function getTheme(theme?: Theme) {
         }
       : undefined,
     shape: {
-      borderRadius: 1,
+      borderRadius: 6,
     },
     components: {
       MuiButtonBase: {

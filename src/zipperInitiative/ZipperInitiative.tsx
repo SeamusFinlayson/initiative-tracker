@@ -29,7 +29,7 @@ import { isPlainObject } from "../isPlainObject";
 
 import ModeEditRoundedIcon from "@mui/icons-material/ModeEditRounded";
 import EditOffRoundedIcon from "@mui/icons-material/EditOffRounded";
-import { selectItem } from "../findItem";
+import { labelItem, removeLabel, selectItem } from "../findItem";
 import { writePreviousStackToScene } from "./previousStack";
 
 /** Check that the item metadata is in the correct format */
@@ -62,11 +62,11 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
         readNumberFromMetadata(
           sceneMetadata,
           ROUND_COUNT_METADATA_ID,
-          roundCount
-        )
+          roundCount,
+        ),
       );
       setPreviousStack(
-        readStringArrayFromMetadata(sceneMetadata, PREVIOUS_STACK_METADATA_ID)
+        readStringArrayFromMetadata(sceneMetadata, PREVIOUS_STACK_METADATA_ID),
       );
     };
     OBR.scene.getMetadata().then(handleSceneMetadataChange);
@@ -79,15 +79,15 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
         readBooleanFromMetadata(
           roomMetadata,
           DISPLAY_ROUND_METADATA_ID,
-          displayRound
-        )
+          displayRound,
+        ),
       );
       setSelectActiveItem(
         readNumberFromMetadata(
           roomMetadata,
           SELECT_ACTIVE_ITEM_METADATA_ID,
-          selectActiveItem
-        )
+          selectActiveItem,
+        ),
       );
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
@@ -122,28 +122,29 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   }, []);
 
   function handleReadyChange(id: string, ready: boolean, previousId: string) {
-    const newActive = !ready;
+    const isNewActive = !ready;
     // Set local items immediately and update previous stack
-    setInitiativeItems(prev =>
-      prev.map(item => {
+    setInitiativeItems((prev) =>
+      prev.map((item) => {
         if (item.id === id) {
           // Highlight ready item on map
-          if (selectActiveItem === 1 && !ready) selectItem(id);
+          if (selectActiveItem === 1 && isNewActive) selectItem(item.id);
+          if (selectActiveItem === 2 && isNewActive) labelItem(item.id);
 
           // Update item locally
           return {
             ...item,
             ready: ready,
-            active: newActive,
+            active: isNewActive,
           };
         } else {
           // Update item locally
           return { ...item, active: false };
         }
-      })
+      }),
     );
 
-    if (newActive) {
+    if (isNewActive) {
       // Record that this item went at this point
       const newPreviousStack = [...previousStack, id];
       setPreviousStack(newPreviousStack);
@@ -153,41 +154,44 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
       const newPreviousStack = previousStack.slice(0, -1);
       setPreviousStack(newPreviousStack);
       writePreviousStackToScene(newPreviousStack);
-      setInitiativeItems(prev =>
-        prev.map(item => {
+      if (newPreviousStack.length === 0) removeLabel();
+      setInitiativeItems((prev) =>
+        prev.map((item) => {
           if (item.id === previousId) {
+            if (selectActiveItem === 1) selectItem(item.id);
+            if (selectActiveItem === 2) labelItem(item.id);
             return { ...item, active: true };
           } else return { ...item };
-        })
+        }),
       );
     }
 
     // Sync item changes over the network
     OBR.scene.items.updateItems(
-      initiativeItems.map(item => item.id),
-      items => {
+      initiativeItems.map((item) => item.id),
+      (items) => {
         for (const item of items) {
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             if (item.id === id) {
               metadata.ready = ready;
-              metadata.active = newActive;
-            } else if (!newActive && item.id === previousId) {
+              metadata.active = isNewActive;
+            } else if (!isNewActive && item.id === previousId) {
               metadata.active = true;
             } else {
               metadata.active = false;
             }
           }
         }
-      }
+      },
     );
   }
 
   function handleGroupChange(id: string, currentGroup: number) {
     const newGroup = currentGroup === 0 ? 1 : 0;
     // Set local items immediately
-    setInitiativeItems(prev =>
-      prev.map(item => {
+    setInitiativeItems((prev) =>
+      prev.map((item) => {
         if (item.id === id) {
           return {
             ...item,
@@ -196,10 +200,10 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
         } else {
           return item;
         }
-      })
+      }),
     );
     // Sync changes over the network
-    OBR.scene.items.updateItems([id], items => {
+    OBR.scene.items.updateItems([id], (items) => {
       for (const item of items) {
         const metadata = item.metadata[getPluginId("metadata")];
         if (isMetadata(metadata)) {
@@ -216,17 +220,17 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
 
     // Set local items immediately
     setInitiativeItems(
-      initiativeItems.map(item => ({
+      initiativeItems.map((item) => ({
         ...item,
         ready: true,
         active: false,
-      }))
+      })),
     );
 
     // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      initiativeItems.map(init => init.id),
-      items => {
+      initiativeItems.map((init) => init.id),
+      (items) => {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
@@ -235,8 +239,11 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
             metadata.active = false;
           }
         }
-      }
+      },
     );
+
+    // Remove your turn label
+    if (selectActiveItem == 2) removeLabel();
   }
 
   const zoomMargin = 1; // scroll bar shows up at 90% page zoom w/o this
@@ -249,9 +256,9 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
     if (listRef0.current && listRef1.current && ResizeObserver) {
       const makeResizeObserver = (
         listHeights: HeightTracker[],
-        index: number
+        index: number,
       ) =>
-        new ResizeObserver(entries => {
+        new ResizeObserver((entries) => {
           if (entries.length > 0) {
             const entry = entries[0];
             // Get the height of the border box
@@ -262,7 +269,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
             // Set a minimum height of 64px
             listHeights[index].height = Math.max(borderHeight, 0);
             let sum = 0;
-            listHeights.forEach(height => {
+            listHeights.forEach((height) => {
               sum += Math.max(height.height, 36);
             });
             // Set the action height to the list height + the card header height + the divider + margin
@@ -279,22 +286,24 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
         if (current) listHeights[i].resizeObserver.observe(current);
       }
       return () => {
-        listHeights.forEach(value => {
+        listHeights.forEach((value) => {
           value.resizeObserver.disconnect();
         });
         // Reset height when unmounted
         OBR.action.setHeight(
-          129 + zoomMargin + (roundCount ? roundCountHeight : 0)
+          129 + zoomMargin + (roundCount ? roundCountHeight : 0),
         );
       };
     }
   }, [roundCount]);
 
-  const partyItems = initiativeItems.filter(item => item.group === 0);
-  const enemyItems = initiativeItems.filter(item => item.group === 1);
+  const partyItems = initiativeItems.filter((item) => item.group === 0);
+  const enemyItems = initiativeItems.filter((item) => item.group === 1);
 
-  const allEnemiesHidden = enemyItems.findIndex(value => value.visible) === -1;
-  const roundFinished = initiativeItems.findIndex(value => value.ready) === -1;
+  const allEnemiesHidden =
+    enemyItems.findIndex((value) => value.visible) === -1;
+  const roundFinished =
+    initiativeItems.findIndex((value) => value.ready) === -1;
 
   return (
     <Stack height="100vh">
@@ -353,20 +362,20 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           </Typography>
         )}
         <List ref={listRef0} sx={{ py: 0 }}>
-          {partyItems.map(item => (
+          {partyItems.map((item) => (
             <InitiativeListItem
               key={item.id}
               item={item}
               onGroupClick={(currentGroup: number) =>
                 handleGroupChange(item.id, currentGroup)
               }
-              onReadyChange={ready => {
+              onReadyChange={(ready) => {
                 handleReadyChange(
                   item.id,
                   ready,
                   previousStack.length > 1
                     ? (previousStack.at(previousStack.length - 2) as string)
-                    : ""
+                    : "",
                 );
               }}
               showHidden={role === "GM"}
@@ -405,20 +414,20 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
         )}
 
         <List ref={listRef1} sx={{ py: 0 }}>
-          {enemyItems.map(item => (
+          {enemyItems.map((item) => (
             <InitiativeListItem
               key={item.id}
               item={item}
               onGroupClick={(currentGroup: number) =>
                 handleGroupChange(item.id, currentGroup)
               }
-              onReadyChange={ready => {
+              onReadyChange={(ready) => {
                 handleReadyChange(
                   item.id,
                   ready,
                   previousStack.length > 1
                     ? (previousStack.at(previousStack.length - 2) as string)
-                    : ""
+                    : "",
                 );
               }}
               showHidden={role === "GM"}
