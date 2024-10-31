@@ -52,6 +52,8 @@ const labelId = "prettySordidActiveLabel";
 export async function labelItem(itemId: string) {
   const bounds = await OBR.scene.items.getItemBounds([itemId]);
   const sceneDpi = await OBR.scene.grid.getDpi();
+  const items = await OBR.scene.items.getItems((item) => item.id === itemId);
+  const item = items[0];
 
   const label = buildLabel()
     .id(labelId)
@@ -72,6 +74,7 @@ export async function labelItem(itemId: string) {
     .backgroundOpacity(1)
     .plainText("Your Turn!")
     .attachedTo(itemId)
+    .visible(item.visible)
     .locked(true)
     .build();
 
