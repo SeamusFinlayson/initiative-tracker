@@ -7,4 +7,5 @@ export interface InitiativeItem {
   count: string;
   ready: boolean;
   group: number;
+  groupIndex: number;
 }

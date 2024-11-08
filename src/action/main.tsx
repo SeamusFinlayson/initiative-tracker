@@ -15,5 +15,5 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <App />
       </PluginThemeProvider>
     </PluginGate>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
