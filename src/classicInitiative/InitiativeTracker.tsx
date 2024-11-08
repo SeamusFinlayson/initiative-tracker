@@ -132,6 +132,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
               // Unused properties
               ready: true,
               group: 0,
+              groupIndex: 0,
             });
           }
         }

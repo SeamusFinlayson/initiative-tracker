@@ -5,8 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import VisibilityOffRounded from "@mui/icons-material/VisibilityOffRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import OutlinedFlagRoundedIcon from "@mui/icons-material/OutlinedFlagRounded";
-import MoveDownRoundedIcon from "@mui/icons-material/MoveDownRounded";
-import MoveUpRoundedIcon from "@mui/icons-material/MoveUpRounded";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
 import OBR from "@owlbear-rodeo/sdk";
 
@@ -17,22 +16,33 @@ import { getPluginId } from "../getPluginId";
 import TokenImage from "../TokenImage";
 import { focusItem } from "../findItem";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+import "../tailwind.css";
+
 export function InitiativeListItem({
   item,
   onReadyChange,
-  onGroupClick,
   showHidden: roleIsGm,
   edit,
 }: {
   item: InitiativeItem;
   onReadyChange: (ready: boolean) => void;
-  onGroupClick: (currentGroup: number) => void;
   showHidden: boolean;
   edit: boolean;
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: item.id });
+
   if (!item.visible && !roleIsGm) {
     return null;
   }
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFocus = (event: any) => {
@@ -41,32 +51,31 @@ export function InitiativeListItem({
 
   return (
     <ListItem
+      ref={setNodeRef}
+      style={{ ...style, cursor: "pointer" }}
+      {...attributes}
       key={item.id}
       secondaryAction={
         <>
           {edit ? (
-            <IconButton
-              className="buttonBox"
-              onClick={() => onGroupClick(item.group)}
-              onDoubleClick={e => e.stopPropagation()}
+            <button
+              style={{ touchAction: "none" }}
+              {...listeners}
+              className="flex size-[42px] items-center justify-center bg-transparent"
             >
-              {item.group === 0 ? (
-                <MoveDownRoundedIcon />
-              ) : (
-                <MoveUpRoundedIcon />
-              )}
-            </IconButton>
+              <DragIndicatorIcon />
+            </button>
           ) : (
             <Checkbox
               checkedIcon={<FlagRoundedIcon></FlagRoundedIcon>}
               icon={<OutlinedFlagRoundedIcon></OutlinedFlagRoundedIcon>}
               checked={item.ready}
-              onFocus={evt => {
+              onFocus={(evt) => {
                 handleFocus(evt);
               }}
               value={item.count}
-              onChange={e => onReadyChange(e.target.checked)}
-              onDoubleClick={e => e.stopPropagation()}
+              onChange={(e) => onReadyChange(e.target.checked)}
+              onDoubleClick={(e) => e.stopPropagation()}
               disabled={
                 (item.group === 1 && !roleIsGm) || (!item.active && !item.ready)
               }
@@ -91,7 +100,7 @@ export function InitiativeListItem({
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
           onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
-          onDoubleClick={e => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
         >
           <div className="buttonBox">
             <TokenImage src={item.url}></TokenImage>
@@ -122,8 +131,8 @@ export function InitiativeListItem({
 }
 
 function removeFromInitiative(itemId: string) {
-  OBR.scene.items.getItems([itemId]).then(items => {
-    OBR.scene.items.updateItems(items, items => {
+  OBR.scene.items.getItems([itemId]).then((items) => {
+    OBR.scene.items.updateItems(items, (items) => {
       for (const item of items) {
         delete item.metadata[getPluginId("metadata")];
       }
