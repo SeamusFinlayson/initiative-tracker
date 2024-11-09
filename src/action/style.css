@@ -56,3 +56,19 @@
   word-wrap: break-word;
   word-break: break-word;
 }
+
+.outline-image {
+  -webkit-filter: drop-shadow(1px 1px 0 #9966ff) drop-shadow(-1px 1px 0 #9966ff)
+    drop-shadow(1px -1px 0 #9966ff) drop-shadow(-1px -1px 0 #9966ff);
+
+  filter: drop-shadow(1px 1px 0 #9966ff) drop-shadow(-1px 1px 0 #9966ff)
+    drop-shadow(1px -1px 0 #9966ff) drop-shadow(-1px -1px 0 #9966ff);
+}
+
+.dark\:outline-image:is(.dark *) {
+  -webkit-filter: drop-shadow(1px 1px 0 #bb99ff) drop-shadow(-1px 1px 0 #bb99ff)
+    drop-shadow(1px -1px 0 #bb99ff) drop-shadow(-1px -1px 0 #bb99ff);
+
+  filter: drop-shadow(1px 1px 0 #bb99ff) drop-shadow(-1px 1px 0 #bb99ff)
+    drop-shadow(1px -1px 0 #bb99ff) drop-shadow(-1px -1px 0 #bb99ff);
+}

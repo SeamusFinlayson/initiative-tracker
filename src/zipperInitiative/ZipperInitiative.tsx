@@ -43,6 +43,7 @@ import { restrictToFirstScrollableAncestor } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import isMetadata from "./isMetadata";
 import writeGroupDataToItems from "./writeGroupDataToItems";
+import useSelection from "../useSelection";
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
@@ -53,6 +54,8 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [selectActiveItem, setSelectActiveItem] = useState(0);
 
   const [editMode, setEditMode] = useState(false);
+
+  const selection = useSelection();
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -451,6 +454,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
                   }}
                   showHidden={role === "GM"}
                   edit={editMode}
+                  selected={selection.includes(item.id)}
                 />
               ))}
             </List>
@@ -472,6 +476,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
                   }}
                   showHidden={role === "GM"}
                   edit={editMode}
+                  selected={selection.includes(item.id)}
                 />
               ))}
             </List>

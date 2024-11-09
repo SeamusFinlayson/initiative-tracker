@@ -20,6 +20,7 @@ type InitiativeListItemProps = {
   onCountChange: (count: string) => void;
   showHidden: boolean;
   darkMode: boolean;
+  selected: boolean;
 };
 
 export function InitiativeListItem({
@@ -27,6 +28,7 @@ export function InitiativeListItem({
   onCountChange,
   showHidden,
   darkMode,
+  selected,
 }: InitiativeListItemProps) {
   const [inputHasFocus, setInputHasFocus] = useState(false);
   const [inputHasHover, setInputHasHover] = useState(false);
@@ -48,7 +50,7 @@ export function InitiativeListItem({
         <Input
           disableUnderline
           sx={{ width: 48 }}
-          onFocus={evt => {
+          onFocus={(evt) => {
             setInputHasFocus(true);
             handleFocus(evt.target as HTMLInputElement);
           }}
@@ -69,20 +71,20 @@ export function InitiativeListItem({
                   ? "rgba(0,0,0,0.4)"
                   : "rgba(255,255,255,0.24)"
                 : inputHasHover
-                ? darkMode
-                  ? "rgba(0,0,0,0.15)"
-                  : "rgba(255,255,255,0.12)"
-                : "rgba(0,0,0,0)",
+                  ? darkMode
+                    ? "rgba(0,0,0,0.15)"
+                    : "rgba(255,255,255,0.12)"
+                  : "rgba(0,0,0,0)",
               // backgroundColor: (inputHasFocus)?"rgba(0,0,0,0.2)":"rgba(0,0,0,0)",
               transition: ".1s",
             },
           }}
           value={item.count}
-          onChange={e => {
+          onChange={(e) => {
             const newCount = e.target.value;
             onCountChange(newCount);
           }}
-          onDoubleClick={e => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
         />
       }
       divider
@@ -102,10 +104,10 @@ export function InitiativeListItem({
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
           onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
-          onDoubleClick={e => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
         >
           <div className="buttonBox">
-            <TokenImage src={item.url}></TokenImage>
+            <TokenImage src={item.url} outline={selected} />
             <CloseIcon
               className="closeIcon"
               sx={{ height: 30, width: 30 }}
@@ -134,8 +136,8 @@ export function InitiativeListItem({
 }
 
 function removeFromInitiative(itemId: string) {
-  OBR.scene.items.getItems([itemId]).then(items => {
-    OBR.scene.items.updateItems(items, items => {
+  OBR.scene.items.getItems([itemId]).then((items) => {
+    OBR.scene.items.updateItems(items, (items) => {
       for (const item of items) {
         delete item.metadata[getPluginId("metadata")];
       }
