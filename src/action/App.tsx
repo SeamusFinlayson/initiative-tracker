@@ -9,17 +9,23 @@ import {
 } from "../metadataHelpers";
 import { ZipperInitiative } from "../zipperInitiative/ZipperInitiative";
 import { getPluginId } from "../getPluginId";
+import addThemeToBody from "../addThemeToBody";
+import { useTheme } from "@mui/material";
 
 const addIcon = new URL("../assets/add.svg#icon", import.meta.url).toString();
 const removeIcon = new URL(
   "../assets/remove.svg#icon",
-  import.meta.url
+  import.meta.url,
 ).toString();
 
 export function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [zipperInitiativeEnabled, setZipperInitiativeEnabled] = useState(false);
   const [role, setRole] = useState<"GM" | "PLAYER">("PLAYER");
+
+  const theme = useTheme();
+
+  addThemeToBody(theme.palette.mode);
 
   useEffect(() => {
     OBR.scene.isReady().then(setSceneReady);
@@ -40,8 +46,8 @@ export function App() {
         readBooleanFromMetadata(
           roomMetadata,
           ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
-          zipperInitiativeEnabled
-        )
+          zipperInitiativeEnabled,
+        ),
       );
     };
     OBR.room.getMetadata().then(handleRoomMetadataChange);
@@ -83,10 +89,10 @@ export function App() {
         ],
         id: getPluginId("menu/toggle"),
         onClick(context) {
-          OBR.scene.items.updateItems(context.items, items => {
+          OBR.scene.items.updateItems(context.items, (items) => {
             // Check whether to add the items to initiative or remove them
             const addToInitiative = items.every(
-              item => item.metadata[getPluginId("metadata")] === undefined
+              (item) => item.metadata[getPluginId("metadata")] === undefined,
             );
             let count = 0;
             for (const item of items) {

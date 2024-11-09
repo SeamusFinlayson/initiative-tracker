@@ -33,6 +33,7 @@ import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
 import SettingsButton from "../settings/SettingsButton";
 import { labelItem, selectItem } from "../findItem";
+import useSelection from "../useSelection";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -58,6 +59,8 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   // Initiative
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
   const [roundCount, setRoundCount] = useState(1);
+
+  const selection = useSelection();
 
   useEffect(() => {
     const handleSceneMetadataChange = (sceneMetadata: Metadata) => {
@@ -334,6 +337,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
                 handleInitiativeCountChange(item.id, newCount);
               }}
               showHidden={role === "GM"}
+              selected={selection.includes(item.id)}
             />
           ))}
         </List>

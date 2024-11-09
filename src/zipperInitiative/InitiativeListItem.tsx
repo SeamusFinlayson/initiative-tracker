@@ -26,11 +26,13 @@ export function InitiativeListItem({
   onReadyChange,
   showHidden: roleIsGm,
   edit,
+  selected,
 }: {
   item: InitiativeItem;
   onReadyChange: (ready: boolean) => void;
   showHidden: boolean;
   edit: boolean;
+  selected: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id });
@@ -103,7 +105,7 @@ export function InitiativeListItem({
           onDoubleClick={(e) => e.stopPropagation()}
         >
           <div className="buttonBox">
-            <TokenImage src={item.url}></TokenImage>
+            <TokenImage src={item.url} outline={selected} />
             <CloseIcon
               className="closeIcon"
               sx={{ height: 30, width: 30 }}

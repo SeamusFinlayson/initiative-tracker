@@ -21,6 +21,7 @@ import { Bug } from "../assets/bug";
 import { QuestionMark } from "../assets/QuestionMark";
 import { History } from "../assets/History";
 import { removeLabel } from "../findItem";
+import addThemeToBody from "../addThemeToBody";
 
 export default function Settings(): JSX.Element {
   // General settings
@@ -96,7 +97,7 @@ export default function Settings(): JSX.Element {
   }, []);
 
   return (
-    <div className="outline-secondary dark:outline-secondary-dark h-full w-full rounded-2xl bg-gray-200/20 py-2 pr-0.5 text-black/[0.87] outline -outline-offset-2 dark:bg-gray-800 dark:text-white">
+    <div className="h-full w-full rounded-2xl bg-gray-200/20 py-2 pr-0.5 text-black/[0.87] outline -outline-offset-2 outline-secondary dark:bg-gray-800 dark:text-white dark:outline-secondary-dark">
       <div className="h-full overflow-y-scroll p-4 pr-1.5 pt-0">
         <div className="flex flex-wrap items-center justify-between gap-2 pb-2 pt-2">
           <div>
@@ -359,13 +360,4 @@ function SubSettingsRow({
       </div>
     </div>
   );
-}
-
-function addThemeToBody(themeMode?: "dark" | "light") {
-  if (themeMode === undefined)
-    themeMode = new URLSearchParams(document.location.search).get(
-      "themeMode",
-    ) as "dark" | "light";
-  if (themeMode === "dark") document.body.classList.add("dark");
-  else document.body.classList.remove("dark");
 }
