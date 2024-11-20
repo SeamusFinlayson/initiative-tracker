@@ -19,7 +19,7 @@ Features:
 - The initiative can be sorted in ascending or descending order using the sort button
 - The initiative value input has hover and focus highlights
 - The current round can be tracked
-- You can use alternating style initiative (useful for the Draw Steel RPG)
+- You can use checkbox style initiative (useful for the Draw Steel RPG)
 
 ## How it Works
 
@@ -33,21 +33,15 @@ To change the initiative order you can change its initiative in the action popov
 
 You can move through the initiative order by clicking the arrow icon in the top of the extension popover.
 
-## Alternating Initiative
+## Checkbox Initiative
 
-A more free form and tactical initiative system where the party and their adversaries alternate taking turns.
+A more free form and tactical initiative system where the party and their adversaries can take turns in any order.
 
-![Alternating Initiative](https://github.com/user-attachments/assets/90d004f6-b5f5-404c-8147-5d4cb205655e)
+![Checkbox Initiative](https://github.com/user-attachments/assets/90d004f6-b5f5-404c-8147-5d4cb205655e)
 
 This can be enabled through the settings menu.
 
-This is inspired by how initiative in Draw Steel, the MCDM RPG, works but I run a D&D 5E game so here is how I am using this in my game:
-
-- One player (the one with the best initiative) rolls against a monster (the one with the best initiative) to decide which side goes first
-- The side that goes first decides amongst themselves which character takes their turn (click the flag beside that character) then the other side does the same
-- The two sides continue alternating turns like this until one side is out of characters
-- The side that still has characters who have not acted takes all their remaining turns
-- Reset the initiative for the next round, the side that won the initiative contest at the beginning acts first again
+This is inspired by how initiative in Draw Steel, the MCDM RPG, works but I run a D&D 5E game so here is how I am using this in my game: [Tempo Initiative Reddit Post](https://www.reddit.com/r/mattcolville/comments/1gw557u/tempo_initiative_a_slightly_structured_free_form/)
 
 ## Feature Requests
 
